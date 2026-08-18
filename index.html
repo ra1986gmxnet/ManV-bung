@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MANV Sichtungsübung - Patient</title>
+    <title>MANV Sichtungsübung - 100 Patienten</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -36,7 +36,6 @@
             margin-bottom: 20px;
         }
 
-        /* Zweispaltiges Layout für Stammdaten + Grafik */
         .top-section {
             display: flex;
             flex-wrap: wrap;
@@ -74,7 +73,6 @@
             padding: 10px;
         }
 
-        /* Schema Bereiche */
         .schema-section {
             margin-top: 25px;
         }
@@ -95,7 +93,6 @@
             padding: 12px 15px;
             cursor: pointer;
             transition: background-color 0.2s;
-            position: relative;
         }
 
         .interactive-block:hover {
@@ -147,301 +144,158 @@
 </head>
 <body>
 
-<div class="container" id="patient-app">
-    <!-- Content wird per JS dynamisch geladen -->
-</div>
+<div class="container" id="patient-app"></div>
 
 <script>
-// Daten der 10 MANV-Übungspatienten
-const patientenData = {
-    1: {
-        name: "Müller", vorname: "Thomas", alter: 42, geschlecht: "Männlich",
-        gehfaehig: "Nein", ansprechbar: "Ja (verlangsamt)",
-        verletzungen: "Starke Blutung rechter Oberschenkel, Schürfwunden Gesicht",
-        ersteindruck: "Kritischer Zustand, Blässe, kaltschweißig",
-        markers: [
-            { x: 120, y: 50, label: "Schürfwunde" },
-            { x: 170, y: 280, label: "Platzwunde / Blutung" }
-        ],
-        xabcde: {
-            "x (eXsanguinating)": "Starke spritzende Oberschenkelblutung rechts -> Abbinden erforderlich!",
-            "A (Airway)": "Atemwege frei, keine Verlegung.",
-            "B (Breathing)": "AF 28/Min, flach, keine Zyanose, SpO2 92%.",
-            "C (Circulation)": "Puls 130/Min schwach, Rekap-Zeit 4 Sek, Blutdruck 85/50 mmHg.",
-            "D (Disability)": "GCS 13 (A:3, V:4, M:6), Pupillen isokor, reagieren auf Licht.",
-            "E (Exposure)": "Unterkühlung droht (35.8°C), Schürfwunden am Arm."
-        },
-        sampler: {
-            "S (Symptome)": "Starke Schmerzen Oberschenkel (NAS 9/10), Schwindel.",
-            "A (Allergien)": "Penicillin",
-            "M (Medikamente)": "Keine Dauerdiagnosen / Medikamente.",
-            "P (Patientengeschichte)": "Keine Vorerkrankungen.",
-            "L (Letzte Mahlzeit)": "Vor ca. 3 Stunden (Kaffee & Brötchen).",
-            "E (Ereignis)": "Explosion in Werkstatt, von Trümmerteil getroffen.",
-            "R (Risikofaktoren)": "Raucher."
-        }
-    },
-    2: {
-        name: "Schmidt", vorname: "Sabine", alter: 29, geschlecht: "Weiblich",
-        gehfaehig: "Ja", ansprechbar: "Ja (voll orientiert)",
-        verletzungen: "Fehlstellung linker Unterarm, Schnittwunde rechte Hand",
-        ersteindruck: "Aufgeregt, hält sich den linken Arm, stabil",
-        markers: [
-            { x: 70, y: 200, label: "Fehlstellung Arm" },
-            { x: 230, y: 220, label: "Schnittwunde" }
-        ],
-        xabcde: {
-            "x (eXsanguinating)": "Keine kritischen äußeren Blutungen.",
-            "A (Airway)": "Atemwege frei.",
-            "B (Breathing)": "AF 16/Min, unauffällig.",
-            "C (Circulation)": "Puls 88/Min kräftig, Rekap-Zeit < 2 Sek.",
-            "D (Disability)": "GCS 15, neurologisch unauffällig.",
-            "E (Exposure)": "Geschlossene Fraktur Unterarm links, Wunde rechte Hand."
-        },
-        sampler: {
-            "S (Symptome)": "Schmerzen linker Unterarm (NAS 6/10).",
-            "A (Allergien)": "Keine bekannten Allergien.",
-            "M (Medikamente)": "Pille.",
-            "P (Patientengeschichte)": "Keine.",
-            "L (Letzte Mahlzeit)": "Vor 1 Stunde.",
-            "E (Ereignis)": "Bei Ausweichbewegung gestürzt und auf Arm gefallen.",
-            "R (Risikofaktoren)": "Keine."
-        }
-    },
-    3: {
-        name: "Weber", vorname: "Michael", alter: 65, geschlecht: "Männlich",
-        gehfaehig: "Nein", ansprechbar: "Nein (Schnappatmung)",
-        verletzungen: "Schwere Schädel-Hirn-Verletzung, eingedrückter Brustkorb",
-        ersteindruck: "Bewusstlos, Zyanose",
-        markers: [
-            { x: 120, y: 40, label: "SHT / Wunde" },
-            { x: 120, y: 140, label: "Thoraxtrauma" }
-        ],
-        xabcde: {
-            "x (eXsanguinating)": "Keine massive äußere Blutung.",
-            "A (Airway)": "Atemwege durch Blut/Erbrochenes verlegt.",
-            "B (Breathing)": "Schnappatmung, AF 4/Min, paradoxe Thoraxbewegung.",
-            "C (Circulation)": "Puls karotidal kaum tastbar (~30/Min).",
-            "D (Disability)": "GCS 3, Pupillen entrundet und lichtstarr.",
-            "E (Exposure)": "Multiple Schürfwunden, offene Fraktur Unterschenkel rechts."
-        },
-        sampler: {
-            "S (Symptome)": "Fremdanamnese: Sofort kollabiert.",
-            "A (Allergien)": "Unbekannt.",
-            "M (Medikamente)": "Blutverdünner (Marcumar laut Ausweis).",
-            "P (Patientengeschichte)": "KHK, Bluthochdruck.",
-            "L (Letzte Mahlzeit)": "Unbekannt.",
-            "E (Ereignis)": "Direkte Druckwelle abgefangen.",
-            "R (Risikofaktoren)": "Herzerkrankung, Antikoaguliert."
-        }
-    },
-    4: {
-        name: "Fischer", vorname: "Anna", alter: 8, geschlecht: "Weiblich",
-        gehfaehig: "Nein", ansprechbar: "Ja (weint laut)",
-        verletzungen: "Brandwunden 2. Grades an beiden Beinen",
-        ersteindruck: "Verängstigt, starke Schmerzen, stabil",
-        markers: [
-            { x: 130, y: 300, label: "Verbrennung 2. Grades" },
-            { x: 170, y: 300, label: "Verbrennung 2. Grades" }
-        ],
-        xabcde: {
-            "x (eXsanguinating)": "Keine spritzenden Blutungen.",
-            "A (Airway)": "Atemwege frei, kein Inhalationstrauma sichtbar.",
-            "B (Breathing)": "AF 24/Min, regelrecht, kein Stridor.",
-            "C (Circulation)": "Puls 110/Min, Rekap-Zeit 2 Sek.",
-            "D (Disability)": "GCS 15, altersgerecht orientiert.",
-            "E (Exposure)": "Verbrennung ca. 15% KOF (Beine Vorderseite), Auskühlung beachten!"
-        },
-        sampler: {
-            "S (Symptome)": "Stärkste Schmerzen Beine (NAS 10/10).",
-            "A (Allergien)": "Nüsse.",
-            "M (Medikamente)": "Keine.",
-            "P (Patientengeschichte)": "Gesund.",
-            "L (Letzte Mahlzeit)": "Vor 2 Stunden.",
-            "E (Ereignis)": "Heißwasser/Flamme nach Trümmersturz abbekommen.",
-            "R (Risikofaktoren)": "Pädiatrischer Patient."
-        }
-    },
-    5: {
-        name: "Wagner", vorname: "Stefan", alter: 51, geschlecht: "Männlich",
-        gehfaehig: "Nein", ansprechbar: "Ja (nur auf Schmerzreiz)",
-        verletzungen: "Thorax rechts, Becken",
-        ersteindruck: "Schwerstkrank, zyanotisch, kaltschweißig",
-        markers: [
-            { x: 140, y: 130, label: "Thoraxtrauma rechts" },
-            { x: 120, y: 220, label: "Beckentrauma" }
-        ],
-        xabcde: {
-            "x (eXsanguinating)": "keine spritzenden Blutungen erkennbar.",
-            "A (Airway)": "Atemwege frei.",
-            "B (Breathing)": "AF 35/Min, hochfrequent, Atemgeräusch rechts aufgehoben, Thoraxtrauma, rechter Thorax instabil.",
-            "C (Circulation)": "Puls 140/Min fadenförmig, BD 70/40 mmHg, Becken instabil.",
-            "D (Disability)": "GCS 8 (Reagiert nur auf Schmerz).",
-            "E (Exposure)": "Extremitätenverletzungen an beiden Beinen, Hautblässe."
-        },
-        sampler: {
-            "S (Symptome)": "Atemnot, schwerer Schock.",
-            "A (Allergien)": "Keine.",
-            "M (Medikamente)": "Beta-Blocker.",
-            "P (Patientengeschichte)": "Hypertonie.",
-            "L (Letzte Mahlzeit)": "Mittagessen vor 4 Std.",
-            "E (Ereignis)": "Aus 3 Meter Höhe abgestürzt.",
-            "R (Risikofaktoren)": "Polytrauma."
-        }
-    },
-    6: {
-        name: "Becker", vorname: "Laura", alter: 19, geschlecht: "Weiblich",
-        gehfaehig: "Ja", ansprechbar: "Ja (hyperventiliert)",
-        verletzungen: "Keine sichtbaren Schürf- oder Platzwunden",
-        ersteindruck: "Panisch, Zittern, Pfötchenstellung der Hände",
-        markers: [],
-        xabcde: {
-            "x (eXsanguinating)": "Keine Blutungen.",
-            "A (Airway)": "Atemwege frei.",
-            "B (Breathing)": "AF 40/Min, sehr flach (Hyperventilation), SpO2 100%.",
-            "C (Circulation)": "Puls 115/Min, BD 135/85 mmHg.",
-            "D (Disability)": "GCS 15, Carpopedalspasmen (Pfötchenstellung).",
-            "E (Exposure)": "Keine äußeren Verletzungen feststellbar."
-        },
-        sampler: {
-            "S (Symptome)": "Kribbeln in den Händen, Atemnotgefühle, Angst.",
-            "A (Allergien)": "Keine.",
-            "M (Medikamente)": "Keine.",
-            "P (Patientengeschichte)": "Asthma (kein Anfall aktuell).",
-            "L (Letzte Mahlzeit)": "Vor 5 Stunden.",
-            "E (Ereignis)": "Knall gehört, in Panik geraten.",
-            "R (Risikofaktoren)": "Psychische Belastung."
-        }
-    },
-    7: {
-        name: "Hoffmann", vorname: "Jan", alter: 35, geschlecht: "Männlich",
-        gehfaehig: "Nein", ansprechbar: "Ja (verwirrt)",
-        verletzungen: "Pfählung Oberschenkel links, Ruß im Gesicht",
-        ersteindruck: "Starke Schmerzen, verwirrt, Brandgeruch",
-        markers: [
-            { x: 120, y: 50, label: "Rußspuren" },
-            { x: 80, y: 280, label: "Pfahlverletzung" }
-        ],
-        xabcde: {
-            "x (eXsanguinating)": "Pfählungsverletzung blutet mäßig.",
-            "A (Airway)": "Inhalationstrauma möglich, Ruß in Nase/Mund, Stimme heiser.",
-            "B (Breathing)": "AF 22/Min, Befeuchteter Stridor beim Einatmen.",
-            "C (Circulation)": "Puls 105/Min, BD 110/70 mmHg.",
-            "D (Disability)": "GCS 14 (Verwirrt zu Ort/Zeit).",
-            "E (Exposure)": "Metallstange ragt aus Oberschenkel links."
-        },
-        sampler: {
-            "S (Symptome)": "Husten, Schmerzen Oberschenkel.",
-            "A (Allergien)": "Pollen.",
-            "M (Medikamente)": "Keine.",
-            "P (Patientengeschichte)": "Keine.",
-            "L (Letzte Mahlzeit)": "Unbekannt.",
-            "E (Ereignis)": "Stand nahe der Rauchquelle/Explosion.",
-            "R (Risikofaktoren)": "Atemwegsverlegung droht!"
-        }
-    },
-    8: {
-        name: "Schulz", vorname: "Elena", alter: 72, geschlecht: "Weiblich",
-        gehfaehig: "Nein", ansprechbar: "Ja (schwach)",
-        verletzungen: "Platzwunde Hinterkopf, Oberschenkel fehlstellung rechts",
-        ersteindruck: "Ältere Dame, liegt am Boden, Bein nach außen rotiert",
-        markers: [
-            { x: 120, y: 30, label: "Platzwunde Kopf" },
-            { x: 160, y: 260, label: "Fehlstellung Hüfte" }
-        ],
-        xabcde: {
-            "x (eXsanguinating)": "Sickerblutung Hinterkopf.",
-            "A (Airway)": "Atemwege frei, eigene Zahnprothese fest.",
-            "B (Breathing)": "AF 18/Min, altersentsprechend.",
-            "C (Circulation)": "Puls 90/Min unregelmäßig (Arhythmie), BD 150/90 mmHg.",
-            "D (Disability)": "GCS 14 (leicht verlangsamt), Pupillen isokor.",
-            "E (Exposure)": "Rechtes Bein verkürzt und nach außen rotiert, starke Schmerzen Hüfte."
-        },
-        sampler: {
-            "S (Symptome)": "Schmerzen Hüfte rechts, Kopfschmerzen.",
-            "A (Allergien)": "Pflasterallergie.",
-            "M (Medikamente)": "Ass 100, Ramipril, Metoprolol.",
-            "P (Patientengeschichte)": "Vorhofflimmern, Osteoporose.",
-            "L (Letzte Mahlzeit)": "Vor 2 Stunden.",
-            "E (Ereignis)": "Auf der Flucht gestolpert und hart aufgeschlagen.",
-            "R (Risikofaktoren)": "Hohes Alter, Sturztrauma."
-        }
-    },
-    9: {
-        name: "Koch", vorname: "Christian", alter: 28, geschlecht: "Männlich",
-        gehfaehig: "Nein", ansprechbar: "Nein (Keine Reaktion)",
-        verletzungen: "Traumatische Amputation Unterschenkel rechts",
-        ersteindruck: "Lachen von Blut, blass, keine Spontanatmung",
-        markers: [
-            { x: 170, y: 330, label: "Amputation" }
-        ],
-        xabcde: {
-            "x (eXsanguinating)": "Massive arterielle Blutung Stumpf rechts",
-            "A (Airway)": "Fällt zurück, Atemwege nach ELS frei.",
-            "B (Breathing)": "Keine Spontanatmung nach ELS (Atemwegsoffnung).",
-            "C (Circulation)": "Kein Karotispuls tastbar.",
-            "D (Disability)": "GCS 3.",
-            "E (Exposure)": "Amputat nicht auffindbar, Patient extrem blass."
-        },
-        sampler: {
-            "S (Symptome)": "Keine (Bewusstlos/Atemstillstand).",
-            "A (Allergien)": "Unbekannt.",
-            "M (Medikamente)": "Unbekannt.",
-            "P (Patientengeschichte)": "Unbekannt.",
-            "L (Letzte Mahlzeit)": "Unbekannt.",
-            "E (Ereignis)": "Direkte Detonation.",
-            "R (Risikofaktoren)": "Unbekannt."
-        }
-    },
-    10: {
-        name: "Richter", vorname: "Tim", alter: 22, geschlecht: "Männlich",
-        gehfaehig: "Ja", ansprechbar: "Ja (voll orientiert)",
-        verletzungen: "Prellung Brustkorb, Schürfwunden an beiden Händen",
-        ersteindruck: "Mobil, hustet leicht, hält sich die Brust",
-        markers: [
-            { x: 120, y: 140, label: "Prellung Thorax" },
-            { x: 70, y: 220, label: "Schürfwunde" },
-            { x: 230, y: 220, label: "Schürfwunde" }
-        ],
-        xabcde: {
-            "x (eXsanguinating)": "Keine bedrohlichen Blutungen.",
-            "A (Airway)": "Atemwege frei.",
-            "B (Breathing)": "AF 18/Min, Thoraxschmerz bei tiefem Einatmen, SpO2 97%.",
-            "C (Circulation)": "Puls 80/Min, BD 125/80 mmHg.",
-            "D (Disability)": "GCS 15.",
-            "E (Exposure)": "Oberflächliche Schürfwunden Hände, Druckschmerz Sternum."
-        },
-        sampler: {
-            "S (Symptome)": "Atemabhängige Schmerzen Brustkorb (NAS 4/10).",
-            "A (Allergien)": "Keine.",
-            "M (Medikamente)": "Keine.",
-            "P (Patientengeschichte)": "Keine.",
-            "L (Letzte Mahlzeit)": "Vor 1 Stunde.",
-            "E (Ereignis)": "Gegen Hindernis gelaufen bei der Evakuierung.",
-            "R (Risikofaktoren)": "Keine."
-        }
-    }
-};
+// Hilfsdaten für Namen
+const nachnamen = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann", "Schäfer", "Koch", "Bauer", "Richter", "Klein", "Wolf", "Schröder", "Neumann", "Schwarz", "Zimmermann"];
+const vornamenM = ["Thomas", "Michael", "Stefan", "Jan", "Christian", "Alexander", "Daniel", "Martin", "Dennis", "Tobias", "Lukas", "Jonas", "Niklas", "Felix", "Maximilian"];
+const vornamenW = ["Sabine", "Anna", "Laura", "Elena", "Julia", "Sarah", "Christina", "Katharina", "Melanie", "Nadine", "Lisa", "Hannah", "Lea", "Emma"];
 
-// URL-Parameter auslesen (?id=1 etc.)
-function getPatientId() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('id') || '1'; // Default zu Patient 1
+// Medizinischer Vorlagen-Pool (Symptom-basiert, KEINE Diagnosen im Ersteindruck!)
+const symptomPool = [
+    // 0: Traumatisch vital bedroht (z.B. schwere Blutung)
+    {
+        gehfaehig: "Nein", ansprechbar: "Ja (sehr verlangsamt)",
+        verletzungen: "Große, stark spritzende Wunde rechter Oberschenkel, Schürfwunden Stirn",
+        ersteindruck: "Kaltschweißig, Blässe, sichtbarer massiver Blutverlust am Bein",
+        markers: [{ x: 170, y: 280, label: "Spritzende Blutung" }, { x: 120, y: 50, label: "Schürfwunde" }],
+        xabcde: { "x (eXsanguinating)": "Starke spritzende Oberschenkelblutung rechts -> Abbinden / Tourniquet!", "A (Airway)": "Atemwege frei, keine Verlegung.", "B (Breathing)": "AF 30/Min, flach, SpO2 90%.", "C (Circulation)": "Puls 138/Min schwach, Rekap-Zeit 4 Sek, BD 80/50 mmHg.", "D (Disability)": "GCS 13 (A:3, V:4, M:6), Pupillen isokor.", "E (Exposure)": "Auskühlung droht (35.4°C)." },
+        sampler: { "S (Symptome)": "Starke Schmerzen Bein (NAS 9/10), kalter Schweiß, Schwindel.", "A (Allergien)": "Penicillin.", "M (Medikamente)": "Keine.", "P (Patientengeschichte)": "Keine bekannten Vorerkrankungen.", "L (Letzte Mahlzeit)": "Vor 3 Stunden.", "E (Ereignis)": "Von scharfkantigem Trümmerteil getroffen.", "R (Risikofaktoren)": "Volumenmangelschock." }
+    },
+    // 1: Atemweg / Thorax symptomatisch
+    {
+        gehfaehig: "Nein", ansprechbar: "Ja (nur kurze Wortfetzen)",
+        verletzungen: "Prellmarke rechter Brustkorb, sichtbare Schwellung am Hals",
+        ersteindruck: "Akute Atemnot, bläuliche Lippen, gestaute Halsvenen, hälts sich die Brust",
+        markers: [{ x: 140, y: 130, label: "Prellmarke / Druckschmerz" }],
+        xabcde: { "x (eXsanguinating)": "Keine spritzenden äußeren Blutungen.", "A (Airway)": "Atemwege frei, Stridor nicht hörbar.", "B (Breathing)": "AF 34/Min, rechts kein Atemgeräusch hörbar, Brustkorb hebt sich ungleichmäßig.", "C (Circulation)": "Puls 135/Min, BD 85/50 mmHg, Halsvenen deutlich gestaut.", "D (Disability)": "GCS 13, Unruhe, Angst.", "E (Exposure)": "Hautemphysem (Knistern) rechtes Oberfeld spürbar." },
+        sampler: { "S (Symptome)": "Stechender Schmerz bei Inspiration, Erstickungsgefühl.", "A (Allergien)": "Keine.", "M (Medikamente)": "Keine.", "P (Patientengeschichte)": "Keine.", "L (Letzte Mahlzeit)": "Vor 2 Stunden.", "E (Ereignis)": "Schwerer Anprall gegen Trümmer.", "R (Risikofaktoren)": "Spannungsanzeichen Thorax." }
+    },
+    // 2: Bewusstseinsstörung / Kopf
+    {
+        gehfaehig: "Nein", ansprechbar: "Nein (nur Reaktionen auf Schmerzreiz)",
+        verletzungen: "Platzwunde Hinterkopf mit Schwellung, Blutspuren im Gesicht",
+        ersteindruck: "Augen geschlossen, unregelmäßige/röchelnde Atmung, reagiert kaum",
+        markers: [{ x: 120, y: 40, label: "Platzwunde / Hämatom" }],
+        xabcde: { "x (eXsanguinating)": "Sickerblutung am Kopf.", "A (Airway)": "Drohende Verlegung durch Zurückfallen der Zunge.", "B (Breathing)": "AF 9/Min, unregelmäßig und tief.", "C (Circulation)": "Puls 52/Min kräftig, BD 165/95 mmHg.", "D (Disability)": "GCS 7 (A:1, V:2, M:4), rechte Pupille weiter als linke.", "E (Exposure)": "Temperatur 36.2°C, Schürfwunden Schulter." },
+        sampler: { "S (Symptome)": "Keine Eigenangaben möglich.", "A (Allergien)": "Unbekannt.", "M (Medikamente)": "Unbekannt.", "P (Patientengeschichte)": "Unbekannt.", "L (Letzte Mahlzeit)": "Unbekannt.", "E (Ereignis)": "Sturz aus Höhe / Kopftanprall.", "R (Risikofaktoren)": "Atemwegssicherung notwendig." }
+    },
+    // 3: Extremitätentrauma
+    {
+        gehfaehig: "Nein", ansprechbar: "Ja (voll orientiert)",
+        verletzungen: "Deutliche Fehlstellung und Schwellung am linken Oberschenkel",
+        ersteindruck: "Liegt am Boden, schreit vor Schmerzen, hält das linke Bein fest",
+        markers: [{ x: 80, y: 280, label: "Fehlstellung / Druckschmerz" }],
+        xabcde: { "x (eXsanguinating)": "Keine äußere arterielle Blutung, deutliche Umfangszunahme Oberschenkel.", "A (Airway)": "Atemwege frei.", "B (Breathing)": "AF 20/Min, SpO2 97%.", "C (Circulation)": "Puls 102/Min, BD 130/80 mmHg, Fußpuls links schwach tastbar.", "D (Disability)": "GCS 15.", "E (Exposure)": "Starke Schmerzsymptomatik, sonst unverletzt." },
+        sampler: { "S (Symptome)": "Stärkste Schmerzen Oberschenkel links (NAS 8/10).", "A (Allergien)": "Pollen.", "M (Medikamente)": "L-Thyroxin.", "P (Patientengeschichte)": "Schilddrüsenunterfunktion.", "L (Letzte Mahlzeit)": "Vor 4 Stunden.", "E (Ereignis)": "Vom herabstürzenden Gegenstand getroffenen.", "R (Risikofaktoren)": "Großer innerer Blutverlust möglich." }
+    },
+    // 4: Thermisches Trauma
+    {
+        gehfaehig: "Nein", ansprechbar: "Ja (orientiert)",
+        verletzungen: "Flächige Rötungen und Blasenbildung an beiden Armen und Brustkorb",
+        ersteindruck: "Starkes Wimmern, sichtbare Blasenbildung, feuchte Wundflächen",
+        markers: [{ x: 70, y: 150, label: "Rötung / Blasen" }, { x: 230, y: 150, label: "Rötung / Blasen" }, { x: 120, y: 130, label: "Rötung / Blasen" }],
+        xabcde: { "x (eXsanguinating)": "Keine akute Blutung.", "A (Airway)": "Atemwege frei, kein Ruß im Mundraum, keine Heiserkeit.", "B (Breathing)": "AF 22/Min, Thorax exkursionsfähig.", "C (Circulation)": "Puls 112/Min, BD 120/75 mmHg.", "D (Disability)": "GCS 15.", "E (Exposure)": "Ca. 18% der Körperoberfläche betroffen, Auskühlung vermeiden!" },
+        sampler: { "S (Symptome)": "Brennende Schmerzen (NAS 9/10).", "A (Allergien)": "Keine.", "M (Medikamente)": "Keine.", "P (Patientengeschichte)": "Gesund.", "L (Letzte Mahlzeit)": "Vor 1 Stunde.", "E (Ereignis)": "Heiße Flüssigkeit / Stichflamme.", "R (Risikofaktoren)": "Hoher Flüssigkeitsverlust." }
+    },
+    // 5: Leichtverletzte / Schnittwunde
+    {
+        gehfaehig: "Ja", ansprechbar: "Ja (voll orientiert)",
+        verletzungen: "Ca. 5 cm lange, mäßig blutende Schnittwunde Unterarm rechts",
+        ersteindruck: "Steht auf eigenen Beinen, hält sich ein Tuch auf den rechten Arm",
+        markers: [{ x: 230, y: 180, label: "Schnittwunde" }],
+        xabcde: { "x (eXsanguinating)": "Mäßige venöse Blutung, gut komprimierbar.", "A (Airway)": "Atemwege frei.", "B (Breathing)": "AF 16/Min, unauffällig.", "C (Circulation)": "Puls 80/Min, BD 125/80 mmHg.", "D (Disability)": "GCS 15.", "E (Exposure)": "Motorik und Sensorik der Hand intakt." },
+        sampler: { "S (Symptome)": "Lokaler Schmerz Unterarm (NAS 3/10).", "A (Allergien)": "Keine.", "M (Medikamente)": "Pille.", "P (Patientengeschichte)": "Keine.", "L (Letzte Mahlzeit)": "Vor 2 Stunden.", "E (Ereignis)": "An geborstenem Glas geschnitten.", "R (Risikofaktoren)": "Keine." }
+    },
+    // 6: Leichtverletzt / Distorsion
+    {
+        gehfaehig: "Ja", ansprechbar: "Ja (aufgeregt)",
+        verletzungen: "Schwellung und Druckschmerz am linken Sprunggelenk",
+        ersteindruck: "Humpelt vorsichtig, wirkt ansonsten stabil",
+        markers: [{ x: 100, y: 340, label: "Schwellung / Druckschmerz" }],
+        xabcde: { "x (eXsanguinating)": "Keine Blutungen.", "A (Airway)": "Atemwege frei.", "B (Breathing)": "AF 18/Min.", "C (Circulation)": "Puls 88/Min, BD 130/85 mmHg.", "D (Disability)": "GCS 15.", "E (Exposure)": "Fuß belasten nicht möglich." },
+        sampler: { "S (Symptome)": "Schmerzen im Fußgelenk (NAS 4/10).", "A (Allergien)": "Hausstaub.", "M (Medikamente)": "Keine.", "P (Patientengeschichte)": "Keine.", "L (Letzte Mahlzeit)": "Vor 3 Stunden.", "E (Ereignis)": "Beim Ausweichen umgeknickt.", "R (Risikofaktoren)": "Keine." }
+    },
+    // 7: Psychische Belastungsreaktion
+    {
+        gehfaehig: "Ja", ansprechbar: "Ja (sehr schnell/hektisch)",
+        verletzungen: "Keine äußeren Wunden oder Prellungen sichtbar",
+        ersteindruck: "Zittert stark, verkrampfte Hände, sehr schnelle/flache Atmung",
+        markers: [],
+        xabcde: { "x (eXsanguinating)": "Keine Blutungen.", "A (Airway)": "Atemwege frei.", "B (Breathing)": "AF 38/Min flach, SpO2 100%.", "C (Circulation)": "Puls 118/Min, BD 140/90 mmHg.", "D (Disability)": "GCS 15, Pfötchenstellung der Hände spürbar.", "E (Exposure)": "Körperlich unversehrt." },
+        sampler: { "S (Symptome)": "Kribbeln in den Fingern, Angstgefühl.", "A (Allergien)": "Keine.", "M (Medikamente)": "Keine.", "P (Patientengeschichte)": "Keine.", "L (Letzte Mahlzeit)": "Vor 5 Stunden.", "E (Ereignis)": "Lauten Knall gehört und Panik bekommen.", "R (Risikofaktoren)": "Hyperventilation." }
+    },
+    // 8: Keine Lebenszeichen
+    {
+        gehfaehig: "Nein", ansprechbar: "Nein",
+        verletzungen: "Schwerste Deformierung des Schädels und des Brustkorbs",
+        ersteindruck: "Reglos, blass-graue Hautfarbe, keine Atembewegungen erkennbar",
+        markers: [{ x: 120, y: 40, label: "Schwerste Deformierung" }],
+        xabcde: { "x (eXsanguinating)": "Keine spritzende Blutung mehr.", "A (Airway)": "Atemwege verlegt/zerstört.", "B (Breathing)": "Keine Spontanatmung vorhanden.", "C (Circulation)": "Kein Zentralpuls tastbar.", "D (Disability)": "GCS 3, Pupillen starr und entrundet.", "E (Exposure)": "Sichere Zeichen des Todes." },
+        sampler: { "S (Symptome)": "Entfällt.", "A (Allergien)": "Unbekannt.", "M (Medikamente)": "Unbekannt.", "P (Patientengeschichte)": "Unbekannt.", "L (Letzte Mahlzeit)": "Unbekannt.", "E (Ereignis)": "Direkte Detonation / Trümmersturz.", "R (Risikofaktoren)": "Nicht überlebensfähig." }
+    },
+    // 9: Inhalationstrauma / Rauchgas
+    {
+        gehfaehig: "Nein", ansprechbar: "Ja (heiser)",
+        verletzungen: "Rußspuren um Mund und Nase, kleine Schürfwunden Hände",
+        ersteindruck: "Hustet stark, heisere Stimme, pfeifendes Atemgeräusch",
+        markers: [{ x: 120, y: 50, label: "Rußanlagerung" }],
+        xabcde: { "x (eXsanguinating)": "Keine äußeren Blutungen.", "A (Airway)": "Inspiratorischer Stridor, Verengung der oberen Atemwege droht!", "B (Breathing)": "AF 26/Min, SpO2 93%.", "C (Circulation)": "Puls 110/Min, BD 135/85 mmHg.", "D (Disability)": "GCS 15.", "E (Exposure)": "Atemwegsödem droht." },
+        sampler: { "S (Symptome)": "Kratzen im Hals, Atemnot, Hustenreiz.", "A (Allergien)": "Keine.", "M (Medikamente)": "Asthmaspray bei Bedarf.", "P (Patientengeschichte)": "Asthma bronchiale.", "L (Letzte Mahlzeit)": "Vor 1 Stunde.", "E (Ereignis)": "Rauchgas ausgesetzt gewesen.", "R (Risikofaktoren)": "Atemwegsverlegung." }
+    }
+];
+
+// Generierung von GENAU 100 individuellen Patienten-Objekten
+function build100Patients() {
+    const list = {};
+    for (let i = 1; i <= 100; i++) {
+        const isMale = i % 2 === 0;
+        const vorname = isMale ? vornamenM[i % vornamenM.length] : vornamenW[i % vornamenW.length];
+        const nachname = nachnamen[(i * 7) % nachnamen.length];
+        const alter = (i * 3) % 72 + 6; // Alter 6 bis 78
+        
+        // Zufallsorientierte aber deterministische Zuordnung aus dem Symptompool
+        const baseScenario = symptomPool[(i * 3 + 1) % symptomPool.length];
+
+        // Tiefe Kopie, um Änderungen pro Patient unabhängig zu halten
+        list[i] = {
+            id: i,
+            name: nachname,
+            vorname: vorname,
+            alter: alter,
+            geschlecht: isMale ? "Männlich" : "Weiblich",
+            gehfaehig: baseScenario.gehfaehig,
+            ansprechbar: baseScenario.ansprechbar,
+            verletzungen: baseScenario.verletzungen,
+            ersteindruck: baseScenario.ersteindruck,
+            markers: baseScenario.markers,
+            xabcde: JSON.parse(JSON.stringify(baseScenario.xabcde)),
+            sampler: JSON.parse(JSON.stringify(baseScenario.sampler))
+        };
+    }
+    return list;
 }
 
-// Hauptfunktion zum Rendern der Seite
+const patientenData = build100Patients();
+
+function getPatientId() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id') || '1';
+}
+
 function renderPatient() {
-    const id = getPatientId();
+    const id = parseInt(getPatientId(), 10);
     const p = patientenData[id];
     const app = document.getElementById('patient-app');
 
     if (!p) {
-        app.innerHTML = `<div class="not-found">Patient mit ID ${id} wurde nicht gefunden!</div>`;
+        app.innerHTML = `<div class="not-found">Patient mit ID ${id} existiert nicht! (Erlaubt: 1 - 100)</div>`;
         return;
     }
 
     let html = `
-        <h1 class="header-title">MANV-Sichtungsübung | Patient #${id}</h1>
+        <h1 class="header-title">MANV-Sichtungsübung | Patient #${p.id} von 100</h1>
 
         <div class="top-section">
             <div class="stammdaten">
@@ -472,12 +326,9 @@ function renderPatient() {
     `;
 
     app.innerHTML = html;
-
-    // Körperzeichnung initialisieren
     drawBodyChart(p.markers);
 }
 
-// Hilfsfunktion zum Erstellen der Klick-Blöcke
 function renderBlocks(dataObj, prefix) {
     let result = '';
     let index = 0;
@@ -499,14 +350,12 @@ function renderBlocks(dataObj, prefix) {
     return result;
 }
 
-// Timer-Funktion für die 10 Sekunden Verzögerung
 const activeTimers = {};
 
 function startTimer(blockId) {
     const content = document.getElementById(`content-${blockId}`);
     const badge = document.getElementById(`badge-${blockId}`);
 
-    // Wenn bereits aufgedeckt oder Timer läuft, nichts tun
     if (content.style.display === 'block' || activeTimers[blockId]) {
         return;
     }
@@ -529,21 +378,17 @@ function startTimer(blockId) {
     }, 1000);
 }
 
-// Stilisierter Körperaufbau via Canvas
 function drawBodyChart(markers) {
     const canvas = document.getElementById('bodyCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    // Hintergrund neutral
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, 300, 400);
 
-    // Stilisierter Körper (Vorderansicht links, Rückseite rechts)
     drawSilhouette(ctx, 75, "Vorderseite");
     drawSilhouette(ctx, 225, "Rückseite");
 
-    // Verletzungen / Markierungen einzeichnen
     markers.forEach(m => {
         ctx.beginPath();
         ctx.arc(m.x, m.y, 8, 0, 2 * Math.PI);
@@ -553,7 +398,6 @@ function drawBodyChart(markers) {
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Text-Label
         ctx.fillStyle = "#000";
         ctx.font = "bold 10px Arial";
         ctx.fillText(m.label, m.x + 12, m.y + 4);
@@ -565,35 +409,24 @@ function drawSilhouette(ctx, centerX, label) {
     ctx.lineWidth = 2;
     ctx.fillStyle = "#ecf0f1";
 
-    // Kopf
     ctx.beginPath();
     ctx.arc(centerX, 40, 15, 0, Math.PI * 2);
     ctx.fill(); ctx.stroke();
 
-    // Torso & Arme & Beine
     ctx.beginPath();
-    // Hals
     ctx.moveTo(centerX - 4, 55);
     ctx.lineTo(centerX + 4, 55);
-    // Schultern
     ctx.lineTo(centerX + 25, 70);
-    // Rechter Arm
     ctx.lineTo(centerX + 35, 150);
     ctx.lineTo(centerX + 25, 150);
     ctx.lineTo(centerX + 15, 90);
-    // Hüfte
     ctx.lineTo(centerX + 15, 180);
-    // Rechtes Bein
     ctx.lineTo(centerX + 20, 320);
     ctx.lineTo(centerX + 5, 320);
-    // Schritt
     ctx.lineTo(centerX, 190);
-    // Linkes Bein
     ctx.lineTo(centerX - 5, 320);
     ctx.lineTo(centerX - 20, 320);
-    // Linke Hüfte
     ctx.lineTo(centerX - 15, 180);
-    // Linker Arm
     ctx.lineTo(centerX - 15, 90);
     ctx.lineTo(centerX - 25, 150);
     ctx.lineTo(centerX - 35, 150);
@@ -602,14 +435,12 @@ function drawSilhouette(ctx, centerX, label) {
     ctx.fill();
     ctx.stroke();
 
-    // Beschriftung (Vorderansicht / Rückseite)
     ctx.fillStyle = "#2c3e50";
     ctx.font = "12px Arial";
     ctx.textAlign = "center";
     ctx.fillText(label, centerX, 365);
 }
 
-// Initialisierung bei Seitenaufruf
 window.onload = renderPatient;
 </script>
 
