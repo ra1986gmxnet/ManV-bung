@@ -327,7 +327,7 @@
 
 <div class="container">
   <header>
-    <h1>ManV Sichtungsübung</h1>
+    <h1>MANV Sichtungsübung</h1>
   </header>
 
   <div id="global-alert" class="alert-banner" style="display:none;">
@@ -433,9 +433,13 @@
 <script>
   let isTimerRunning = false;
 
-  // Pool für medizinische und lebensstilbedingte Risikofaktoren
+  // Erweiterter Pool für eine bessere Durchmischung (ca. 50% "Keine"-Einträge)
   const riskFactorPool = [
     "Keine bekannt",
+    "Keine bekannt",
+    "Keine wesentlichen Risikofaktoren",
+    "Keine bekannt",
+    "Keine wesentlichen Risikofaktoren",
     "Adipositas Permagna (BMI > 35)",
     "Nikotinabusus (30 Pack Years)",
     "Chronischer Alkoholabusus",
@@ -445,7 +449,9 @@
     "Adipositas Grad I",
     "C2- und Nikotinabusus",
     "Drogenabusus (Polytoxikomanie)",
-    "Keine wesentlichen Risikofaktoren"
+    "Diabetes Mellitus Typ 2",
+    "Z.n. Myokardinfarkt",
+    "Arterielle Hypertonie"
   ];
 
   // 100 Patienten Generator
@@ -462,7 +468,10 @@
       const ln = names[i % names.length];
       const age = 15 + (i * 7) % 65;
       const gender = isFemale ? "weiblich" : "männlich";
-      const riskFactor = riskFactorPool[i % riskFactorPool.length];
+      
+      // Bessere mathematische Durchmischung der Risikofaktoren
+      const riskIndex = (i * 13 + 7) % riskFactorPool.length;
+      const riskFactor = riskFactorPool[riskIndex];
 
       let type = i % 5; 
       let pat = {
@@ -637,7 +646,7 @@
           { key: "Patientengesch.", val: "Unbekannt" },
           { key: "Letzte Mahlzeit", val: "Unbekannt" },
           { key: "Ereignis", val: "Von Trümmerteilen getroffen" },
-          { key: "Risikofaktoren", val: "Unbekannt" }
+          { key: "Risikofaktoren", val: "Nicht beurteilbar" }
         ];
         pat.scores = [
           { key: "GCS", val: "3 Punkte (E1, V1, M1)" },
