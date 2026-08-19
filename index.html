@@ -94,6 +94,9 @@
       border-left: 6px solid var(--ral-1026);
       margin-bottom: 8px;
       border-radius: 2px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     /* Ersteinschätzung Panel */
@@ -115,6 +118,13 @@
       border-radius: 4px;
       border: 1px solid var(--gray-medium);
       border-left: 4px solid var(--ral-5002);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .info-box-content {
+      flex-grow: 1;
     }
 
     .info-box label {
@@ -128,6 +138,11 @@
     .info-box span {
       font-size: 0.95rem;
       font-weight: 600;
+    }
+
+    .info-box-action {
+      margin-left: 10px;
+      white-space: nowrap;
     }
 
     .alert-box {
@@ -189,6 +204,7 @@
       white-space: nowrap;
       z-index: 10;
       box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+      display: none; /* Erst nach Countdown anzeigen */
     }
 
     /* Detail-Raster (Zwei-Spalten Dashboard mit Zeilen-Alignment) */
@@ -338,24 +354,67 @@
   <div class="patient-header">
     <div class="section-title">Ersteinschätzung</div>
     <div class="grid-2">
-      <div class="info-box"><label>Name, Vorname</label><span id="pat-name">-</span></div>
-      <div class="info-box"><label>Alter / Geschlecht</label><span id="pat-age-gender">-</span></div>
+      <div class="info-box">
+        <div class="info-box-content">
+          <label>Name, Vorname</label><span id="pat-name">-</span>
+        </div>
+      </div>
+      <div class="info-box">
+        <div class="info-box-content">
+          <label>Alter / Geschlecht</label><span id="pat-age-gender">-</span>
+        </div>
+      </div>
     </div>
+
+    <!-- Ersteindruck mit 5s Timer -->
     <div class="info-box" style="margin-top:6px;">
-      <label>Ersteindruck</label><span id="pat-impression">-</span>
+      <div class="info-box-content">
+        <label>Ersteindruck</label>
+        <span id="val-header-impression" class="hidden-val">---</span>
+        <span id="real-val-header-impression" style="display:none;"></span>
+      </div>
+      <div class="info-box-action">
+        <button class="btn-start" id="btn-header-impression" onclick="runCountdown('header-impression', 5)">Start</button>
+        <span class="timer-text" id="timer-header-impression" style="display:none;">5s</span>
+      </div>
     </div>
+
+    <!-- Gehfähigkeit mit 5s Timer -->
     <div class="info-box" style="margin-top:6px;">
-      <label>Gehfähigkeit</label><span id="pat-walking-ability">-</span>
+      <div class="info-box-content">
+        <label>Gehfähigkeit</label>
+        <span id="val-header-walking" class="hidden-val">---</span>
+        <span id="real-val-header-walking" style="display:none;"></span>
+      </div>
+      <div class="info-box-action">
+        <button class="btn-start" id="btn-header-walking" onclick="runCountdown('header-walking', 5)">Start</button>
+        <span class="timer-text" id="timer-header-walking" style="display:none;">5s</span>
+      </div>
     </div>
+
+    <!-- Offensichtliche Verletzungen mit 5s Timer -->
     <div class="info-box alert-box" style="margin-top:6px;">
-      <label style="color: var(--ral-3024);">Offensichtliche Verletzungen / Erkrankungen</label>
-      <span id="pat-visible-injuries" style="font-weight: bold; color: var(--ral-3024);">-</span>
+      <div class="info-box-content">
+        <label style="color: var(--ral-3024);">Offensichtliche Verletzungen / Erkrankungen</label>
+        <span id="val-header-injuries" class="hidden-val" style="font-weight: bold; color: var(--ral-3024);">---</span>
+        <span id="real-val-header-injuries" style="display:none;"></span>
+      </div>
+      <div class="info-box-action">
+        <button class="btn-start" id="btn-header-injuries" onclick="runCountdown('header-injuries', 5)">Start</button>
+        <span class="timer-text" id="timer-header-injuries" style="display:none;">5s</span>
+      </div>
     </div>
   </div>
 
-  <!-- Schema Mensch -->
+  <!-- Schema Mensch mit 5s Timer -->
   <div class="body-schema-section">
-    <div class="section-title">Verletzungsmuster / Körperstatus</div>
+    <div class="section-title">
+      <span>Verletzungsmuster / Körperstatus</span>
+      <div>
+        <button class="btn-start" id="btn-body-schema" onclick="runCountdown('body-schema', 5, revealBodyMarkers)">Start</button>
+        <span class="timer-text" id="timer-body-schema" style="display:none; color: #ffffff;">5s</span>
+      </div>
+    </div>
     <div class="body-container">
       <div>
         <div class="body-label">Vorderseite</div>
@@ -388,7 +447,7 @@
     </div>
   </div>
 
-  <!-- Detail-Spalten (Horizontale Synchronisation) -->
+  <!-- Detail-Spalten (Horizontale Synchronisation mit 10s Timer) -->
   <div class="detail-grid">
     <!-- Linke Spalte -->
     <div>
@@ -469,15 +528,19 @@
       const age = 15 + (i * 7) % 65;
       const gender = isFemale ? "weiblich" : "männlich";
       
-      // Bessere mathematische Durchmischung der Risikofaktoren
       const riskIndex = (i * 13 + 7) % riskFactorPool.length;
       const riskFactor = riskFactorPool[riskIndex];
 
       let type = i % 5; 
+      
+      // Bewusstlos / Nicht ansprechbar Check
+      const isUnconscious = (type === 1 || type === 4 || type === 0); // Rot, Schwarz, Blau
+
       let pat = {
         id: i,
-        name: `${ln}, ${fn}`,
-        ageGender: `${age} J. / ${gender}`,
+        // Regel: Bewusstlose/Nicht ansprechbare Patienten haben Unbekannte Stammdaten
+        name: isUnconscious ? "Unbekannt" : `${ln}, ${fn}`,
+        ageGender: isUnconscious ? `Unbekannt / ${gender}` : `${age} J. / ${gender}`,
         impression: "",
         walkingAbility: "",
         visibleInjuries: "",
@@ -505,11 +568,11 @@
           { letter: "E", label: "Exposure", val: "Kühle Haut, Schürfwunden Rumpf" }
         ];
         pat.sampler = [
-          { key: "Symptome", val: "Starke Schmerzen, Dyspnoe" },
+          { key: "Symptome", val: "Patient nicht ansprechbar" },
           { key: "Allergien", val: "Unbekannt" },
           { key: "Medikation", val: "Unbekannt" },
-          { key: "Patientengesch.", val: "Keine Vorerkrankungen bekannt" },
-          { key: "Letzte Mahlzeit", val: "Vor 3 Stunden" },
+          { key: "Patientengesch.", val: "Unbekannt" },
+          { key: "Letzte Mahlzeit", val: "Unbekannt" },
           { key: "Ereignis", val: "Vom LKW erfasst" },
           { key: "Risikofaktoren", val: riskFactor }
         ];
@@ -749,7 +812,7 @@
         tr.innerHTML = `
           <td class="param-label">${labelContent}</td>
           <td class="param-action">
-            <button class="btn-start" id="btn-${rowId}" onclick="runSingleCountdown('${rowId}')">Start</button>
+            <button class="btn-start" id="btn-${rowId}" onclick="runCountdown('${rowId}', 10)">Start</button>
             <span class="timer-text" id="timer-${rowId}" style="display:none;">10s</span>
           </td>
           <td class="param-value">
@@ -758,7 +821,7 @@
           </td>
         `;
       } else {
-        // Leere Zeile ohne Inhalt, Beschriftung oder Button
+        // Leere Zeile ohne Inhalt
         tr.innerHTML = `
           <td class="param-label">&nbsp;</td>
           <td class="param-action">&nbsp;</td>
@@ -775,13 +838,16 @@
 
     if (!p) return;
 
+    // Stammdaten direkt setzen
     document.getElementById('pat-name').innerText = p.name;
     document.getElementById('pat-age-gender').innerText = p.ageGender;
-    document.getElementById('pat-impression').innerText = p.impression;
-    document.getElementById('pat-walking-ability').innerText = p.walkingAbility;
-    document.getElementById('pat-visible-injuries').innerText = p.visibleInjuries;
 
-    // Körper-Marker
+    // Versteckte Texte für den oberen Abschnitt hinterlegen
+    document.getElementById('real-val-header-impression').innerText = p.impression;
+    document.getElementById('real-val-header-walking').innerText = p.walkingAbility;
+    document.getElementById('real-val-header-injuries').innerText = p.visibleInjuries;
+
+    // Körper-Marker vorbereiten (aber vorerst ausgeblendet lassen)
     p.markers.forEach(m => {
       const container = document.getElementById(m.view === 'front' ? 'front-view' : 'back-view');
       const markerEl = document.createElement('div');
@@ -792,14 +858,15 @@
       container.appendChild(markerEl);
     });
 
-    // Tabellen rendern und Zeilenhöhe angleichen (8 Zeilen pro Block)
+    // Tabellen rendern (mit 10-Sekunden Countdown)
     renderTableSection('table-abcde', p.abcde, 'abcde', 8);
     renderTableSection('table-vitals', p.vitals, 'vitals', 8);
     renderTableSection('table-sampler', p.sampler, 'sampler', 8);
     renderTableSection('table-scores', p.scores, 'scores', 8);
   }
 
-  function runSingleCountdown(rowId) {
+  // Universelle Countdown-Funktion (unterstützt dynamische Dauer: 5s oder 10s sowie Callback-Funktionen)
+  function runCountdown(rowId, duration, onCompleteCallback) {
     if (isTimerRunning) {
       showGlobalAlert();
       return;
@@ -809,12 +876,12 @@
     const btn = document.getElementById(`btn-${rowId}`);
     const timerDisplay = document.getElementById(`timer-${rowId}`);
     const valDisplay = document.getElementById(`val-${rowId}`);
-    const realVal = document.getElementById(`real-val-${rowId}`).innerText;
+    const realValEl = document.getElementById(`real-val-${rowId}`);
 
     btn.style.display = 'none';
     timerDisplay.style.display = 'inline';
 
-    let timeLeft = 10;
+    let timeLeft = duration;
     timerDisplay.innerText = `${timeLeft}s`;
 
     const interval = setInterval(() => {
@@ -824,11 +891,25 @@
       if (timeLeft <= 0) {
         clearInterval(interval);
         timerDisplay.style.display = 'none';
-        valDisplay.innerText = realVal;
-        valDisplay.classList.remove('hidden-val');
+        
+        if (valDisplay && realValEl) {
+          valDisplay.innerText = realValEl.innerText;
+          valDisplay.classList.remove('hidden-val');
+        }
+
+        if (onCompleteCallback) {
+          onCompleteCallback();
+        }
+
         isTimerRunning = false;
       }
     }, 1000);
+  }
+
+  // Blendet die Körper-Marker nach Ablauf des Schema-Timers ein
+  function revealBodyMarkers() {
+    const markers = document.querySelectorAll('.injury-marker');
+    markers.forEach(m => m.style.display = 'block');
   }
 
   function showGlobalAlert() {
