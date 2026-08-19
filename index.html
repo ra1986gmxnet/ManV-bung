@@ -1,447 +1,682 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MANV Sichtungsübung - 100 Patienten</title>
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #e74c3c;
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MANV Sichtungsübung - Rettungsdienst Protokoll</title>
+  <style>
+    :root {
+      --ral-3024: #FF2A00; /* Tagesleuchtrot */
+      --ral-1026: #E5F30B; /* Leuchtgelb */
+      --ral-5002: #00209F; /* Signalblau */
+      --bg-color: #EBF0F5;
+      --card-bg: #FFFFFF;
+      --text-color: #000000;
+      --border-color: #2C3E50;
+      --gray-light: #F1F4F8;
+      --gray-medium: #D1D8E0;
+      --gray-dark: #34495E;
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 10px;
+      line-height: 1.3;
+    }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+    .container {
+      max-width: 1050px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border: 4px solid var(--ral-5002);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+    }
 
-        .header-title {
-            text-align: center;
-            border-bottom: 3px solid var(--primary-color);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
+    header {
+      background-color: var(--ral-5002);
+      color: #FFFFFF;
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 5px solid var(--ral-3024);
+      position: relative;
+    }
 
-        .top-section {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+    header h1 { 
+      font-size: 1.4rem; 
+      text-transform: uppercase; 
+      letter-spacing: 1.5px;
+      font-weight: 800;
+    }
 
-        .stammdaten {
-            flex: 1;
-            min-width: 280px;
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-radius: 8px;
-            border-left: 5px solid var(--primary-color);
-        }
+    .section-title {
+      background: var(--gray-dark);
+      color: #FFFFFF;
+      padding: 6px 12px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      border-left: 6px solid var(--ral-1026);
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
 
-        .stammdaten p {
-            margin: 10px 0;
-            font-size: 1.05rem;
-        }
+    /* Ersteinschätzung */
+    .patient-header {
+      padding: 12px;
+      border-bottom: 2px solid var(--border-color);
+      background: #FAFAFA;
+    }
 
-        .stammdaten strong {
-            color: var(--primary-color);
-        }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
 
-        .body-chart-container {
-            flex: 1;
-            min-width: 300px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 10px;
-        }
+    .info-box {
+      background: var(--card-bg);
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--gray-medium);
+    }
 
-        .schema-section {
-            margin-top: 25px;
-        }
+    .info-box label {
+      font-weight: bold;
+      display: block;
+      font-size: 0.75rem;
+      color: var(--gray-dark);
+      text-transform: uppercase;
+    }
 
-        .schema-section h2 {
-            background: var(--primary-color);
-            color: #fff;
-            padding: 10px 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-        }
+    .info-box span {
+      font-size: 0.95rem;
+    }
 
-        .interactive-block {
-            background: #f8f9fa;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            padding: 12px 15px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+    /* Personenschema */
+    .body-schema-section {
+      padding: 12px;
+      border-bottom: 2px solid var(--border-color);
+      background: #FFF;
+      text-align: center;
+    }
 
-        .interactive-block:hover {
-            background-color: #edf2f7;
-        }
+    .body-container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
 
-        .block-header {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: var(--primary-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .body-view {
+      position: relative;
+      width: 120px;
+      height: 260px;
+      border: 2px dashed var(--gray-dark);
+      background: var(--gray-light);
+      border-radius: 8px;
+    }
 
-        .block-content {
-            display: none;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed #cbd5e0;
-            color: #2d3748;
-        }
+    .body-label {
+      font-weight: bold;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
 
-        .status-badge {
-            font-size: 0.85rem;
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: #cbd5e0;
-            color: #4a5568;
-        }
+    .body-svg {
+      width: 100%;
+      height: 100%;
+      fill: #CBD5E1;
+      stroke: #334155;
+      stroke-width: 2;
+    }
 
-        .timer-active {
-            background: #fefcbf;
-            color: #744210;
-        }
+    .injury-marker {
+      position: absolute;
+      background: var(--ral-3024);
+      color: #FFF;
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 2px 5px;
+      border-radius: 3px;
+      border: 1px solid #000;
+      white-space: nowrap;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
 
-        .revealed {
-            background: #c6f6d5;
-            color: #22543d;
-        }
+    /* Unterer Bereich (2 Spalten) */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg-color);
+    }
 
-        .not-found {
-            text-align: center;
-            padding: 50px;
-            font-size: 1.5rem;
-            color: #e74c3c;
-        }
-    </style>
+    @media (max-width: 768px) {
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      border: 2px solid var(--border-color);
+      border-radius: 5px;
+      background: #FFF;
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: var(--ral-5002);
+      color: #FFF;
+      padding: 6px 10px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    /* Einzel-Countdown Tabellen-Layout */
+    .interactive-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .interactive-table tr {
+      border-bottom: 1px solid var(--gray-medium);
+    }
+
+    .interactive-table tr:nth-child(even) {
+      background-color: var(--gray-light);
+    }
+
+    .interactive-table td {
+      padding: 6px 8px;
+      font-size: 0.85rem;
+      vertical-align: middle;
+    }
+
+    .param-label {
+      font-weight: bold;
+      width: 30%;
+      color: var(--text-color);
+    }
+
+    .param-action {
+      width: 100px;
+      text-align: center;
+    }
+
+    .param-value {
+      width: auto;
+      font-weight: 600;
+    }
+
+    .hidden-val {
+      filter: blur(5px);
+      user-select: none;
+      opacity: 0.3;
+    }
+
+    .btn-start {
+      background-color: var(--ral-3024);
+      color: #FFFFFF;
+      border: 1px solid #000;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      border-radius: 3px;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .btn-start:disabled {
+      background-color: #94A3B8;
+      border-color: #64748B;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .timer-text {
+      font-weight: bold;
+      color: var(--ral-5002);
+      font-size: 0.85rem;
+    }
+
+    .alert-banner {
+      background: var(--ral-1026);
+      color: #000;
+      padding: 8px;
+      font-size: 0.85rem;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 2px solid var(--ral-3024);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container" id="patient-app"></div>
+<div class="container">
+  <header>
+    <h1>Rettungsdienst MANV Sichtungsschema</h1>
+  </header>
+
+  <div id="global-alert" class="alert-banner" style="display:none;">
+    ⚠️ Es läuft bereits eine Untersuchung! Bitte warten Sie den aktuellen Countdown ab.
+  </div>
+
+  <!-- Ersteinschätzung -->
+  <div class="patient-header">
+    <div class="section-title">Ersteinschätzung</div>
+    <div class="grid-2">
+      <div class="info-box"><label>Name, Vorname</label><span id="pat-name">-</span></div>
+      <div class="info-box"><label>Alter / Geschlecht</label><span id="pat-age-gender">-</span></div>
+    </div>
+    <div class="info-box" style="margin-top:6px;">
+      <label>Ersteindruck</label><span id="pat-impression">-</span>
+    </div>
+    <div class="info-box" style="margin-top:6px; border-left: 4px solid var(--ral-3024);">
+      <label>Offensichtliche Verletzungen / Erkrankungen</label>
+      <span id="pat-visible-injuries" style="font-weight: bold; color: var(--ral-3024);">-</span>
+    </div>
+  </div>
+
+  <!-- Schema Mensch -->
+  <div class="body-schema-section">
+    <div class="section-title">Lokalisation / Verletzungsmuster</div>
+    <div class="body-container">
+      <div>
+        <div class="body-label">Vorderseite</div>
+        <div class="body-view" id="front-view">
+          <svg class="body-svg" viewBox="0 0 100 200">
+            <circle cx="50" cy="20" r="12"/>
+            <rect x="42" y="32" width="16" height="8"/>
+            <rect x="30" y="40" width="40" height="60" rx="5"/>
+            <rect x="18" y="40" width="10" height="65" rx="3"/>
+            <rect x="72" y="40" width="10" height="65" rx="3"/>
+            <rect x="34" y="102" width="13" height="80" rx="3"/>
+            <rect x="53" y="102" width="13" height="80" rx="3"/>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div class="body-label">Rückseite</div>
+        <div class="body-view" id="back-view">
+          <svg class="body-svg" viewBox="0 0 100 200">
+            <circle cx="50" cy="20" r="12"/>
+            <rect x="42" y="32" width="16" height="8"/>
+            <rect x="30" y="40" width="40" height="60" rx="5"/>
+            <rect x="18" y="40" width="10" height="65" rx="3"/>
+            <rect x="72" y="40" width="10" height="65" rx="3"/>
+            <rect x="34" y="102" width="13" height="80" rx="3"/>
+            <rect x="53" y="102" width="13" height="80" rx="3"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail-Spalten -->
+  <div class="detail-grid">
+    <!-- Linke Spalte: Befunde -->
+    <div class="column">
+      
+      <!-- x-ABCDE -->
+      <div class="card">
+        <div class="card-header">x-ABCDE Schema</div>
+        <table class="interactive-table">
+          <tbody id="table-abcde"></tbody>
+        </table>
+      </div>
+
+      <!-- SAMPLER -->
+      <div class="card">
+        <div class="card-header">SAMPLER Anamnese</div>
+        <table class="interactive-table">
+          <tbody id="table-sampler"></tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- Rechte Spalte: Messwerte -->
+    <div class="column">
+      <div class="card">
+        <div class="card-header">Vitalparameter / Messwerte</div>
+        <table class="interactive-table">
+          <tbody id="table-vitals"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <script>
-// Hilfsdaten für Namen
-const nachnamen = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann", "Schäfer", "Koch", "Bauer", "Richter", "Klein", "Wolf", "Schröder", "Neumann", "Schwarz", "Zimmermann"];
-const vornamenM = ["Thomas", "Michael", "Stefan", "Jan", "Christian", "Alexander", "Daniel", "Martin", "Dennis", "Tobias", "Lukas", "Jonas", "Niklas", "Felix", "Maximilian"];
-const vornamenW = ["Sabine", "Anna", "Laura", "Elena", "Julia", "Sarah", "Christina", "Katharina", "Melanie", "Nadine", "Lisa", "Hannah", "Lea", "Emma"];
+  let isTimerRunning = false;
 
-// Medizinischer Vorlagen-Pool (Symptom-basiert, KEINE Diagnosen im Ersteindruck!)
-const symptomPool = [
-    // 0: Traumatisch vital bedroht (z.B. schwere Blutung)
-    {
-        gehfaehig: "Nein", ansprechbar: "Ja (sehr verlangsamt)",
-        verletzungen: "Große, stark spritzende Wunde rechter Oberschenkel, Schürfwunden Stirn",
-        ersteindruck: "Kaltschweißig, Blässe, sichtbarer massiver Blutverlust am Bein",
-        markers: [{ x: 170, y: 280, label: "Spritzende Blutung" }, { x: 120, y: 50, label: "Schürfwunde" }],
-        xabcde: { "x (eXsanguinating)": "Starke spritzende Oberschenkelblutung rechts -> Abbinden / Tourniquet!", "A (Airway)": "Atemwege frei, keine Verlegung.", "B (Breathing)": "AF 30/Min, flach, SpO2 90%.", "C (Circulation)": "Puls 138/Min schwach, Rekap-Zeit 4 Sek, BD 80/50 mmHg.", "D (Disability)": "GCS 13 (A:3, V:4, M:6), Pupillen isokor.", "E (Exposure)": "Auskühlung droht (35.4°C)." },
-        sampler: { "S (Symptome)": "Starke Schmerzen Bein (NAS 9/10), kalter Schweiß, Schwindel.", "A (Allergien)": "Penicillin.", "M (Medikamente)": "Keine.", "P (Patientengeschichte)": "Keine bekannten Vorerkrankungen.", "L (Letzte Mahlzeit)": "Vor 3 Stunden.", "E (Ereignis)": "Von scharfkantigem Trümmerteil getroffen.", "R (Risikofaktoren)": "Volumenmangelschock." }
-    },
-    // 1: Atemweg / Thorax symptomatisch
-    {
-        gehfaehig: "Nein", ansprechbar: "Ja (nur kurze Wortfetzen)",
-        verletzungen: "Prellmarke rechter Brustkorb, sichtbare Schwellung am Hals",
-        ersteindruck: "Akute Atemnot, bläuliche Lippen, gestaute Halsvenen, hälts sich die Brust",
-        markers: [{ x: 140, y: 130, label: "Prellmarke / Druckschmerz" }],
-        xabcde: { "x (eXsanguinating)": "Keine spritzenden äußeren Blutungen.", "A (Airway)": "Atemwege frei, Stridor nicht hörbar.", "B (Breathing)": "AF 34/Min, rechts kein Atemgeräusch hörbar, Brustkorb hebt sich ungleichmäßig.", "C (Circulation)": "Puls 135/Min, BD 85/50 mmHg, Halsvenen deutlich gestaut.", "D (Disability)": "GCS 13, Unruhe, Angst.", "E (Exposure)": "Hautemphysem (Knistern) rechtes Oberfeld spürbar." },
-        sampler: { "S (Symptome)": "Stechender Schmerz bei Inspiration, Erstickungsgefühl.", "A (Allergien)": "Keine.", "M (Medikamente)": "Keine.", "P (Patientengeschichte)": "Keine.", "L (Letzte Mahlzeit)": "Vor 2 Stunden.", "E (Ereignis)": "Schwerer Anprall gegen Trümmer.", "R (Risikofaktoren)": "Spannungsanzeichen Thorax." }
-    },
-    // 2: Bewusstseinsstörung / Kopf
-    {
-        gehfaehig: "Nein", ansprechbar: "Nein (nur Reaktionen auf Schmerzreiz)",
-        verletzungen: "Platzwunde Hinterkopf mit Schwellung, Blutspuren im Gesicht",
-        ersteindruck: "Augen geschlossen, unregelmäßige/röchelnde Atmung, reagiert kaum",
-        markers: [{ x: 120, y: 40, label: "Platzwunde / Hämatom" }],
-        xabcde: { "x (eXsanguinating)": "Sickerblutung am Kopf.", "A (Airway)": "Drohende Verlegung durch Zurückfallen der Zunge.", "B (Breathing)": "AF 9/Min, unregelmäßig und tief.", "C (Circulation)": "Puls 52/Min kräftig, BD 165/95 mmHg.", "D (Disability)": "GCS 7 (A:1, V:2, M:4), rechte Pupille weiter als linke.", "E (Exposure)": "Temperatur 36.2°C, Schürfwunden Schulter." },
-        sampler: { "S (Symptome)": "Keine Eigenangaben möglich.", "A (Allergien)": "Unbekannt.", "M (Medikamente)": "Unbekannt.", "P (Patientengeschichte)": "Unbekannt.", "L (Letzte Mahlzeit)": "Unbekannt.", "E (Ereignis)": "Sturz aus Höhe / Kopftanprall.", "R (Risikofaktoren)": "Atemwegssicherung notwendig." }
-    },
-    // 3: Extremitätentrauma
-    {
-        gehfaehig: "Nein", ansprechbar: "Ja (voll orientiert)",
-        verletzungen: "Deutliche Fehlstellung und Schwellung am linken Oberschenkel",
-        ersteindruck: "Liegt am Boden, schreit vor Schmerzen, hält das linke Bein fest",
-        markers: [{ x: 80, y: 280, label: "Fehlstellung / Druckschmerz" }],
-        xabcde: { "x (eXsanguinating)": "Keine äußere arterielle Blutung, deutliche Umfangszunahme Oberschenkel.", "A (Airway)": "Atemwege frei.", "B (Breathing)": "AF 20/Min, SpO2 97%.", "C (Circulation)": "Puls 102/Min, BD 130/80 mmHg, Fußpuls links schwach tastbar.", "D (Disability)": "GCS 15.", "E (Exposure)": "Starke Schmerzsymptomatik, sonst unverletzt." },
-        sampler: { "S (Symptome)": "Stärkste Schmerzen Oberschenkel links (NAS 8/10).", "A (Allergien)": "Pollen.", "M (Medikamente)": "L-Thyroxin.", "P (Patientengeschichte)": "Schilddrüsenunterfunktion.", "L (Letzte Mahlzeit)": "Vor 4 Stunden.", "E (Ereignis)": "Vom herabstürzenden Gegenstand getroffenen.", "R (Risikofaktoren)": "Großer innerer Blutverlust möglich." }
-    },
-    // 4: Thermisches Trauma
-    {
-        gehfaehig: "Nein", ansprechbar: "Ja (orientiert)",
-        verletzungen: "Flächige Rötungen und Blasenbildung an beiden Armen und Brustkorb",
-        ersteindruck: "Starkes Wimmern, sichtbare Blasenbildung, feuchte Wundflächen",
-        markers: [{ x: 70, y: 150, label: "Rötung / Blasen" }, { x: 230, y: 150, label: "Rötung / Blasen" }, { x: 120, y: 130, label: "Rötung / Blasen" }],
-        xabcde: { "x (eXsanguinating)": "Keine akute Blutung.", "A (Airway)": "Atemwege frei, kein Ruß im Mundraum, keine Heiserkeit.", "B (Breathing)": "AF 22/Min, Thorax exkursionsfähig.", "C (Circulation)": "Puls 112/Min, BD 120/75 mmHg.", "D (Disability)": "GCS 15.", "E (Exposure)": "Ca. 18% der Körperoberfläche betroffen, Auskühlung vermeiden!" },
-        sampler: { "S (Symptome)": "Brennende Schmerzen (NAS 9/10).", "A (Allergien)": "Keine.", "M (Medikamente)": "Keine.", "P (Patientengeschichte)": "Gesund.", "L (Letzte Mahlzeit)": "Vor 1 Stunde.", "E (Ereignis)": "Heiße Flüssigkeit / Stichflamme.", "R (Risikofaktoren)": "Hoher Flüssigkeitsverlust." }
-    },
-    // 5: Leichtverletzte / Schnittwunde
-    {
-        gehfaehig: "Ja", ansprechbar: "Ja (voll orientiert)",
-        verletzungen: "Ca. 5 cm lange, mäßig blutende Schnittwunde Unterarm rechts",
-        ersteindruck: "Steht auf eigenen Beinen, hält sich ein Tuch auf den rechten Arm",
-        markers: [{ x: 230, y: 180, label: "Schnittwunde" }],
-        xabcde: { "x (eXsanguinating)": "Mäßige venöse Blutung, gut komprimierbar.", "A (Airway)": "Atemwege frei.", "B (Breathing)": "AF 16/Min, unauffällig.", "C (Circulation)": "Puls 80/Min, BD 125/80 mmHg.", "D (Disability)": "GCS 15.", "E (Exposure)": "Motorik und Sensorik der Hand intakt." },
-        sampler: { "S (Symptome)": "Lokaler Schmerz Unterarm (NAS 3/10).", "A (Allergien)": "Keine.", "M (Medikamente)": "Pille.", "P (Patientengeschichte)": "Keine.", "L (Letzte Mahlzeit)": "Vor 2 Stunden.", "E (Ereignis)": "An geborstenem Glas geschnitten.", "R (Risikofaktoren)": "Keine." }
-    },
-    // 6: Leichtverletzt / Distorsion
-    {
-        gehfaehig: "Ja", ansprechbar: "Ja (aufgeregt)",
-        verletzungen: "Schwellung und Druckschmerz am linken Sprunggelenk",
-        ersteindruck: "Humpelt vorsichtig, wirkt ansonsten stabil",
-        markers: [{ x: 100, y: 340, label: "Schwellung / Druckschmerz" }],
-        xabcde: { "x (eXsanguinating)": "Keine Blutungen.", "A (Airway)": "Atemwege frei.", "B (Breathing)": "AF 18/Min.", "C (Circulation)": "Puls 88/Min, BD 130/85 mmHg.", "D (Disability)": "GCS 15.", "E (Exposure)": "Fuß belasten nicht möglich." },
-        sampler: { "S (Symptome)": "Schmerzen im Fußgelenk (NAS 4/10).", "A (Allergien)": "Hausstaub.", "M (Medikamente)": "Keine.", "P (Patientengeschichte)": "Keine.", "L (Letzte Mahlzeit)": "Vor 3 Stunden.", "E (Ereignis)": "Beim Ausweichen umgeknickt.", "R (Risikofaktoren)": "Keine." }
-    },
-    // 7: Psychische Belastungsreaktion
-    {
-        gehfaehig: "Ja", ansprechbar: "Ja (sehr schnell/hektisch)",
-        verletzungen: "Keine äußeren Wunden oder Prellungen sichtbar",
-        ersteindruck: "Zittert stark, verkrampfte Hände, sehr schnelle/flache Atmung",
-        markers: [],
-        xabcde: { "x (eXsanguinating)": "Keine Blutungen.", "A (Airway)": "Atemwege frei.", "B (Breathing)": "AF 38/Min flach, SpO2 100%.", "C (Circulation)": "Puls 118/Min, BD 140/90 mmHg.", "D (Disability)": "GCS 15, Pfötchenstellung der Hände spürbar.", "E (Exposure)": "Körperlich unversehrt." },
-        sampler: { "S (Symptome)": "Kribbeln in den Fingern, Angstgefühl.", "A (Allergien)": "Keine.", "M (Medikamente)": "Keine.", "P (Patientengeschichte)": "Keine.", "L (Letzte Mahlzeit)": "Vor 5 Stunden.", "E (Ereignis)": "Lauten Knall gehört und Panik bekommen.", "R (Risikofaktoren)": "Hyperventilation." }
-    },
-    // 8: Keine Lebenszeichen
-    {
-        gehfaehig: "Nein", ansprechbar: "Nein",
-        verletzungen: "Schwerste Deformierung des Schädels und des Brustkorbs",
-        ersteindruck: "Reglos, blass-graue Hautfarbe, keine Atembewegungen erkennbar",
-        markers: [{ x: 120, y: 40, label: "Schwerste Deformierung" }],
-        xabcde: { "x (eXsanguinating)": "Keine spritzende Blutung mehr.", "A (Airway)": "Atemwege verlegt/zerstört.", "B (Breathing)": "Keine Spontanatmung vorhanden.", "C (Circulation)": "Kein Zentralpuls tastbar.", "D (Disability)": "GCS 3, Pupillen starr und entrundet.", "E (Exposure)": "Sichere Zeichen des Todes." },
-        sampler: { "S (Symptome)": "Entfällt.", "A (Allergien)": "Unbekannt.", "M (Medikamente)": "Unbekannt.", "P (Patientengeschichte)": "Unbekannt.", "L (Letzte Mahlzeit)": "Unbekannt.", "E (Ereignis)": "Direkte Detonation / Trümmersturz.", "R (Risikofaktoren)": "Nicht überlebensfähig." }
-    },
-    // 9: Inhalationstrauma / Rauchgas
-    {
-        gehfaehig: "Nein", ansprechbar: "Ja (heiser)",
-        verletzungen: "Rußspuren um Mund und Nase, kleine Schürfwunden Hände",
-        ersteindruck: "Hustet stark, heisere Stimme, pfeifendes Atemgeräusch",
-        markers: [{ x: 120, y: 50, label: "Rußanlagerung" }],
-        xabcde: { "x (eXsanguinating)": "Keine äußeren Blutungen.", "A (Airway)": "Inspiratorischer Stridor, Verengung der oberen Atemwege droht!", "B (Breathing)": "AF 26/Min, SpO2 93%.", "C (Circulation)": "Puls 110/Min, BD 135/85 mmHg.", "D (Disability)": "GCS 15.", "E (Exposure)": "Atemwegsödem droht." },
-        sampler: { "S (Symptome)": "Kratzen im Hals, Atemnot, Hustenreiz.", "A (Allergien)": "Keine.", "M (Medikamente)": "Asthmaspray bei Bedarf.", "P (Patientengeschichte)": "Asthma bronchiale.", "L (Letzte Mahlzeit)": "Vor 1 Stunde.", "E (Ereignis)": "Rauchgas ausgesetzt gewesen.", "R (Risikofaktoren)": "Atemwegsverlegung." }
-    }
-];
+  // 100 Patienten Generator
+  function generatePatients() {
+    const names = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann"];
+    const firstnamesM = ["Lukas", "Leon", "Finn", "Paul", "Jonas", "Felix", "Maximilian", "Henry", "Noah", "Elias"];
+    const firstnamesF = ["Emma", "Mia", "Sophia", "Hannah", "Emilia", "Anna", "Lina", "Marie", "Mila", "Lea"];
 
-// Generierung von GENAU 100 individuellen Patienten-Objekten
-function build100Patients() {
-    const list = {};
+    let list = [];
+
     for (let i = 1; i <= 100; i++) {
-        const isMale = i % 2 === 0;
-        const vorname = isMale ? vornamenM[i % vornamenM.length] : vornamenW[i % vornamenW.length];
-        const nachname = nachnamen[(i * 7) % nachnamen.length];
-        const alter = (i * 3) % 72 + 6; // Alter 6 bis 78
-        
-        // Zufallsorientierte aber deterministische Zuordnung aus dem Symptompool
-        const baseScenario = symptomPool[(i * 3 + 1) % symptomPool.length];
+      const isFemale = i % 2 === 0;
+      const fn = isFemale ? firstnamesF[i % firstnamesF.length] : firstnamesM[i % firstnamesM.length];
+      const ln = names[i % names.length];
+      const age = 15 + (i * 7) % 65;
+      const gender = isFemale ? "weiblich" : "männlich";
 
-        // Tiefe Kopie, um Änderungen pro Patient unabhängig zu halten
-        list[i] = {
-            id: i,
-            name: nachname,
-            vorname: vorname,
-            alter: alter,
-            geschlecht: isMale ? "Männlich" : "Weiblich",
-            gehfaehig: baseScenario.gehfaehig,
-            ansprechbar: baseScenario.ansprechbar,
-            verletzungen: baseScenario.verletzungen,
-            ersteindruck: baseScenario.ersteindruck,
-            markers: baseScenario.markers,
-            xabcde: JSON.parse(JSON.stringify(baseScenario.xabcde)),
-            sampler: JSON.parse(JSON.stringify(baseScenario.sampler))
-        };
+      let type = i % 5; 
+      let pat = {
+        id: i,
+        name: `${ln}, ${fn}`,
+        ageGender: `${age} J. / ${gender}`,
+        impression: "",
+        visibleInjuries: "",
+        markers: [],
+        abcde: [],
+        sampler: [],
+        vitals: []
+      };
+
+      if (type === 1) { // ROT (Triage 1)
+        pat.impression = "Apathisch, kaltschweißig, schwere Atemnot.";
+        pat.visibleInjuries = "Starke arterielle Blutung Oberschenkel re., Zyanose, Fehlstellung Unterschenkel.";
+        pat.markers = [
+          { view: "front", top: "65%", left: "30%", text: "Spritzende Blutung" },
+          { view: "front", top: "75%", left: "60%", text: "Fehlstellung" }
+        ];
+        pat.abcde = [
+          { key: "eXsanguination", val: "Kritische Blutung A. femoralis rechts" },
+          { key: "Airway", val: "Atemwege frei" },
+          { key: "Breathing", val: "AF 32/min, zyanotisch, feuchte Nebengeräusche" },
+          { key: "Circulation", val: "Puls radialis nicht tastbar, Karotis schwach" },
+          { key: "Disability", val: "GCS 9 (V3, M4, O2), Pupillen träge" },
+          { key: "Exposure", val: "Hypothermie, Schürfwunden Rumpf" }
+        ];
+        pat.sampler = [
+          { key: "Symptome", val: "Starke Schmerzen, Dyspnoe" },
+          { key: "Allergien", val: "Unbekannt" },
+          { key: "Medikation", val: "Unbekannt" },
+          { key: "Patientengesch.", val: "Keine Vorerkrankungen bekannt" },
+          { key: "Letzte Mahlzeit", val: "Vor 3 Stunden" },
+          { key: "Ereignis", val: "Vom LKW erfasst" },
+          { key: "Risikofaktoren", val: "Hämorrhagischer Schock" }
+        ];
+        // Schock -> RR < 100 mmHg -> ReKap > 2 Sek
+        pat.vitals = [
+          { key: "ReKap-Zeit", val: "> 2 Sek (verzögert)" },
+          { key: "Puls", val: "145 bpm (fadenförmig)" },
+          { key: "SpO2", val: "82 %" },
+          { key: "Blutdruck", val: "75/40 mmHg" },
+          { key: "Atemfrequenz", val: "32 / min" },
+          { key: "Blutzucker", val: "110 mg/dl" },
+          { key: "Temperatur", val: "35.2 °C" },
+          { key: "etCO2", val: "26 mmHg" }
+        ];
+      } else if (type === 2) { // GELB (Triage 2)
+        pat.impression = "Wach, ansprechbar, starke Schmerzen, hält Arm fest.";
+        pat.visibleInjuries = "Fehlstellung Unterarm li., Ruß um Mund und Nase, Schnittwunde Kopf.";
+        pat.markers = [
+          { view: "front", top: "15%", left: "45%", text: "Platzwunde" },
+          { view: "front", top: "45%", left: "15%", text: "Unterarmfraktur" }
+        ];
+        pat.abcde = [
+          { key: "eXsanguination", val: "Keine kritische Blutung" },
+          { key: "Airway", val: "Atemwege frei, Rußspuren oral" },
+          { key: "Breathing", val: "AF 20/min, Vesikuläratmen bds." },
+          { key: "Circulation", val: "Puls kräftig, regelmäßig" },
+          { key: "Disability", val: "GCS 15, Pupillen isokor" },
+          { key: "Exposure", val: "Geschlossene Fraktur Li. Unterarm" }
+        ];
+        pat.sampler = [
+          { key: "Symptome", val: "Schmerzen Arm (7/10)" },
+          { key: "Allergien", val: "Penicillin" },
+          { key: "Medikation", val: "Ramipril 5mg" },
+          { key: "Patientengesch.", val: "Arterieller Hypertonus" },
+          { key: "Letzte Mahlzeit", val: "Vor 1 Stunde" },
+          { key: "Ereignis", val: "Explosion im Gebäude" },
+          { key: "Risikofaktoren", val: "Inhalationstrauma möglich" }
+        ];
+        // Stabil -> RR >= 100 mmHg -> ReKap < 2 Sek
+        pat.vitals = [
+          { key: "ReKap-Zeit", val: "< 2 Sek (normal)" },
+          { key: "Puls", val: "92 bpm" },
+          { key: "SpO2", val: "96 %" },
+          { key: "Blutdruck", val: "135/85 mmHg" },
+          { key: "Atemfrequenz", val: "20 / min" },
+          { key: "Blutzucker", val: "125 mg/dl" },
+          { key: "Temperatur", val: "36.8 °C" },
+          { key: "etCO2", val: "37 mmHg" }
+        ];
+      } else if (type === 3) { // GRÜN (Triage 3)
+        pat.impression = "Gehfähig, aufgeregt, leichtes Hinken.";
+        pat.visibleInjuries = "Schürfwunden Knie li., Prellung Schulter re., blasse Haut.";
+        pat.markers = [
+          { view: "front", top: "70%", left: "35%", text: "Schürfwunde" },
+          { view: "back", top: "25%", left: "65%", text: "Prellung Schulter" }
+        ];
+        pat.abcde = [
+          { key: "eXsanguination", val: "Keine" },
+          { key: "Airway", val: "Frei" },
+          { key: "Breathing", val: "Unauffällig, unbeeinträchtigt" },
+          { key: "Circulation", val: "Puls gut tastbar" },
+          { key: "Disability", val: "GCS 15, voll orientiert" },
+          { key: "Exposure", val: "Oberflächliche Schürfwunden" }
+        ];
+        pat.sampler = [
+          { key: "Symptome", val: "Leichte Schmerzen Knie" },
+          { key: "Allergien", val: "Keine" },
+          { key: "Medikation", val: "Keine" },
+          { key: "Patientengesch.", val: "Keine" },
+          { key: "Letzte Mahlzeit", val: "Vor 4 Stunden" },
+          { key: "Ereignis", val: "Sturz beim Flüchten" },
+          { key: "Risikofaktoren", val: "Keine" }
+        ];
+        pat.vitals = [
+          { key: "ReKap-Zeit", val: "< 2 Sek (normal)" },
+          { key: "Puls", val: "80 bpm" },
+          { key: "SpO2", val: "99 %" },
+          { key: "Blutdruck", val: "120/80 mmHg" },
+          { key: "Atemfrequenz", val: "14 / min" },
+          { key: "Blutzucker", val: "98 mg/dl" },
+          { key: "Temperatur", val: "36.5 °C" },
+          { key: "etCO2", val: "39 mmHg" }
+        ];
+      } else if (type === 4) { // SCHWARZ (Triage 4)
+        pat.impression = "Reglos, keine Atembewegung erkennbar.";
+        pat.visibleInjuries = "Schwere Schädel-Hirn-Zertrümmerung, Amputation Oberschenkel li.";
+        pat.markers = [
+          { view: "front", top: "10%", left: "40%", text: "Offenes SHT" },
+          { view: "front", top: "65%", left: "30%", text: "Subtotale Amputation" }
+        ];
+        pat.abcde = [
+          { key: "eXsanguination", val: "Keine Aktionen möglich" },
+          { key: "Airway", val: "Nicht frei / verlegt" },
+          { key: "Breathing", val: "Keine Spontanatmung (auch nach Esmarch)" },
+          { key: "Circulation", val: "Kein Puls (A. carotis 0)" },
+          { key: "Disability", val: "GCS 3, Pupillen weit & lichtstarr" },
+          { key: "Exposure", val: "Tödliche Verletzungen" }
+        ];
+        pat.sampler = [
+          { key: "Symptome", val: "Keine Angaben möglich" },
+          { key: "Allergien", val: "Unbekannt" },
+          { key: "Medikation", val: "Unbekannt" },
+          { key: "Patientengesch.", val: "Unbekannt" },
+          { key: "Letzte Mahlzeit", val: "Unbekannt" },
+          { key: "Ereignis", val: "Von Trümmerteilen getroffen" },
+          { key: "Risikofaktoren", val: "-" }
+        ];
+        pat.vitals = [
+          { key: "ReKap-Zeit", val: "> 2 Sek (keine Perfusion)" },
+          { key: "Puls", val: "0 bpm" },
+          { key: "SpO2", val: "0 %" },
+          { key: "Blutdruck", val: "0/0 mmHg" },
+          { key: "Atemfrequenz", val: "0 / min" },
+          { key: "Blutzucker", val: "- mg/dl" },
+          { key: "Temperatur", val: "33.1 °C" },
+          { key: "etCO2", val: "0 mmHg" }
+        ];
+      } else { // BLAU / ROT (Triage Blau/Extrem kritisch)
+        pat.impression = "Schnappatmung, hochroter Kopf, starkes Schwitzen, Verbrennungen 3. Grades 80% KOF.";
+        pat.visibleInjuries = "Grad III Verbrennungen Rumpf & Beine, Brandwunden Gesicht.";
+        pat.markers = [
+          { view: "front", top: "35%", left: "35%", text: "Verbrennung 3°" },
+          { view: "back", top: "35%", left: "35%", text: "Verbrennung 3°" }
+        ];
+        pat.abcde = [
+          { key: "eXsanguination", val: "Keine spritzenden Blutungen" },
+          { key: "Airway", val: "Inhalationstrauma schwerst, Ödem" },
+          { key: "Breathing", val: "Schnappatmung AF 4/min" },
+          { key: "Circulation", val: "Puls zentral kaum tastbar, fadenförmig" },
+          { key: "Disability", val: "GCS 4" },
+          { key: "Exposure", val: "Verbrennung >80% KOF" }
+        ];
+        pat.sampler = [
+          { key: "Symptome", val: "Keine zielgerichtete Reaktion" },
+          { key: "Allergien", val: "Unbekannt" },
+          { key: "Medikation", val: "Unbekannt" },
+          { key: "Patientengesch.", val: "Unbekannt" },
+          { key: "Letzte Mahlzeit", val: "Unbekannt" },
+          { key: "Ereignis", val: "Direkte Flammeneinwirkung" },
+          { key: "Risikofaktoren", val: "Morbide Prognose" }
+        ];
+        pat.vitals = [
+          { key: "ReKap-Zeit", val: "> 2 Sek (verzögert)" },
+          { key: "Puls", val: "40 bpm" },
+          { key: "SpO2", val: "55 %" },
+          { key: "Blutdruck", val: "50/20 mmHg" },
+          { key: "Atemfrequenz", val: "4 / min" },
+          { key: "Blutzucker", val: "160 mg/dl" },
+          { key: "Temperatur", val: "34.8 °C" },
+          { key: "etCO2", val: "15 mmHg" }
+        ];
+      }
+
+      list.push(pat);
     }
     return list;
-}
+  }
 
-const patientenData = build100Patients();
+  const patientsData = generatePatients();
 
-function getPatientId() {
+  function getPatientIdFromUrl() {
     const params = new URLSearchParams(window.location.search);
-    return params.get('id') || '1';
-}
+    let id = parseInt(params.get('id'));
+    if (isNaN(id) || id < 1 || id > 100) id = 1;
+    return id;
+  }
 
-function renderPatient() {
-    const id = parseInt(getPatientId(), 10);
-    const p = patientenData[id];
-    const app = document.getElementById('patient-app');
+  function renderTableSection(containerId, dataArray, prefix) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
 
-    if (!p) {
-        app.innerHTML = `<div class="not-found">Patient mit ID ${id} existiert nicht! (Erlaubt: 1 - 100)</div>`;
-        return;
+    dataArray.forEach((item, index) => {
+      const rowId = `${prefix}-${index}`;
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td class="param-label">${item.key}</td>
+        <td class="param-action">
+          <button class="btn-start" id="btn-${rowId}" onclick="runSingleCountdown('${rowId}')">Start</button>
+          <span class="timer-text" id="timer-${rowId}" style="display:none;">10s</span>
+        </td>
+        <td class="param-value">
+          <span id="val-${rowId}" class="hidden-val">---</span>
+          <span id="real-val-${rowId}" style="display:none;">${item.val}</span>
+        </td>
+      `;
+      container.appendChild(tr);
+    });
+  }
+
+  function loadPatientData() {
+    const id = getPatientIdFromUrl();
+    const p = patientsData.find(item => item.id === id);
+
+    if (!p) return;
+
+    document.getElementById('pat-name').innerText = p.name;
+    document.getElementById('pat-age-gender').innerText = p.ageGender;
+    document.getElementById('pat-impression').innerText = p.impression;
+    document.getElementById('pat-visible-injuries').innerText = p.visibleInjuries;
+
+    // Körper-Marker
+    p.markers.forEach(m => {
+      const container = document.getElementById(m.view === 'front' ? 'front-view' : 'back-view');
+      const markerEl = document.createElement('div');
+      markerEl.className = 'injury-marker';
+      markerEl.style.top = m.top;
+      markerEl.style.left = m.left;
+      markerEl.innerText = m.text;
+      container.appendChild(markerEl);
+    });
+
+    // Tabellen rendern
+    renderTableSection('table-abcde', p.abcde, 'abcde');
+    renderTableSection('table-sampler', p.sampler, 'sampler');
+    renderTableSection('table-vitals', p.vitals, 'vitals');
+  }
+
+  function runSingleCountdown(rowId) {
+    if (isTimerRunning) {
+      showGlobalAlert();
+      return;
     }
 
-    let html = `
-        <h1 class="header-title">MANV-Sichtungsübung | Patient #${p.id} von 100</h1>
+    isTimerRunning = true;
+    const btn = document.getElementById(`btn-${rowId}`);
+    const timerDisplay = document.getElementById(`timer-${rowId}`);
+    const valDisplay = document.getElementById(`val-${rowId}`);
+    const realVal = document.getElementById(`real-val-${rowId}`).innerText;
 
-        <div class="top-section">
-            <div class="stammdaten">
-                <p><strong>Name:</strong> ${p.name}</p>
-                <p><strong>Vorname:</strong> ${p.vorname}</p>
-                <p><strong>Alter:</strong> ${p.alter}</p>
-                <p><strong>Geschlecht:</strong> ${p.geschlecht}</p>
-                <p><strong>Gehfähig:</strong> ${p.gehfaehig}</p>
-                <p><strong>Ansprechbar:</strong> ${p.ansprechbar}</p>
-                <p><strong>Offensichtliche Verletzungen:</strong> ${p.verletzungen}</p>
-                <p><strong>Ersteindruck:</strong> ${p.ersteindruck}</p>
-            </div>
-
-            <div class="body-chart-container">
-                <canvas id="bodyCanvas" width="300" height="400"></canvas>
-            </div>
-        </div>
-
-        <div class="schema-section">
-            <h2>x-ABCDE Schema</h2>
-            ${renderBlocks(p.xabcde, 'xabcde')}
-        </div>
-
-        <div class="schema-section">
-            <h2>SAMPLER Schema</h2>
-            ${renderBlocks(p.sampler, 'sampler')}
-        </div>
-    `;
-
-    app.innerHTML = html;
-    drawBodyChart(p.markers);
-}
-
-function renderBlocks(dataObj, prefix) {
-    let result = '';
-    let index = 0;
-    for (const [key, value] of Object.entries(dataObj)) {
-        const blockId = `${prefix}-${index}`;
-        result += `
-            <div class="interactive-block" onclick="startTimer('${blockId}')">
-                <div class="block-header">
-                    <span>${key}</span>
-                    <span class="status-badge" id="badge-${blockId}">Klicken zum Ermitteln</span>
-                </div>
-                <div class="block-content" id="content-${blockId}">
-                    ${value}
-                </div>
-            </div>
-        `;
-        index++;
-    }
-    return result;
-}
-
-const activeTimers = {};
-
-function startTimer(blockId) {
-    const content = document.getElementById(`content-${blockId}`);
-    const badge = document.getElementById(`badge-${blockId}`);
-
-    if (content.style.display === 'block' || activeTimers[blockId]) {
-        return;
-    }
+    btn.style.display = 'none';
+    timerDisplay.style.display = 'inline';
 
     let timeLeft = 10;
-    badge.className = 'status-badge timer-active';
-    badge.innerText = `Wartezeit: ${timeLeft}s`;
+    timerDisplay.innerText = `${timeLeft}s`;
 
-    activeTimers[blockId] = setInterval(() => {
-        timeLeft--;
-        if (timeLeft > 0) {
-            badge.innerText = `Wartezeit: ${timeLeft}s`;
-        } else {
-            clearInterval(activeTimers[blockId]);
-            delete activeTimers[blockId];
-            badge.className = 'status-badge revealed';
-            badge.innerText = 'Ermittelt';
-            content.style.display = 'block';
-        }
+    const interval = setInterval(() => {
+      timeLeft--;
+      timerDisplay.innerText = `${timeLeft}s`;
+
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        timerDisplay.style.display = 'none';
+        valDisplay.innerText = realVal;
+        valDisplay.classList.remove('hidden-val');
+        isTimerRunning = false;
+      }
     }, 1000);
-}
+  }
 
-function drawBodyChart(markers) {
-    const canvas = document.getElementById('bodyCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+  function showGlobalAlert() {
+    const alertBox = document.getElementById('global-alert');
+    alertBox.style.display = 'block';
+    setTimeout(() => {
+      alertBox.style.display = 'none';
+    }, 3000);
+  }
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, 300, 400);
-
-    drawSilhouette(ctx, 75, "Vorderseite");
-    drawSilhouette(ctx, 225, "Rückseite");
-
-    markers.forEach(m => {
-        ctx.beginPath();
-        ctx.arc(m.x, m.y, 8, 0, 2 * Math.PI);
-        ctx.fillStyle = "rgba(231, 76, 60, 0.8)";
-        ctx.fill();
-        ctx.strokeStyle = "#c0392b";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        ctx.fillStyle = "#000";
-        ctx.font = "bold 10px Arial";
-        ctx.fillText(m.label, m.x + 12, m.y + 4);
-    });
-}
-
-function drawSilhouette(ctx, centerX, label) {
-    ctx.strokeStyle = "#7f8c8d";
-    ctx.lineWidth = 2;
-    ctx.fillStyle = "#ecf0f1";
-
-    ctx.beginPath();
-    ctx.arc(centerX, 40, 15, 0, Math.PI * 2);
-    ctx.fill(); ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(centerX - 4, 55);
-    ctx.lineTo(centerX + 4, 55);
-    ctx.lineTo(centerX + 25, 70);
-    ctx.lineTo(centerX + 35, 150);
-    ctx.lineTo(centerX + 25, 150);
-    ctx.lineTo(centerX + 15, 90);
-    ctx.lineTo(centerX + 15, 180);
-    ctx.lineTo(centerX + 20, 320);
-    ctx.lineTo(centerX + 5, 320);
-    ctx.lineTo(centerX, 190);
-    ctx.lineTo(centerX - 5, 320);
-    ctx.lineTo(centerX - 20, 320);
-    ctx.lineTo(centerX - 15, 180);
-    ctx.lineTo(centerX - 15, 90);
-    ctx.lineTo(centerX - 25, 150);
-    ctx.lineTo(centerX - 35, 150);
-    ctx.lineTo(centerX - 25, 70);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = "#2c3e50";
-    ctx.font = "12px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText(label, centerX, 365);
-}
-
-window.onload = renderPatient;
+  window.onload = loadPatientData;
 </script>
 
 </body>
