@@ -464,9 +464,9 @@
       };
 
       if (type === 1) { // ROT (Triage 1)
-        pat.impression = "Apathisch, kaltschweißig, schwere Atemnot.";
-        pat.walkingAbility = "Nein (nicht gehfähig, im Schockzustand)";
-        pat.visibleInjuries = "Starke arterielle Blutung Oberschenkel re., Zyanose, Fehlstellung Unterschenkel.";
+        pat.impression = "Apathisch, kaltschweißig, sichtbare angestrengte/schnelle Atmung.";
+        pat.walkingAbility = "Nein (liegt am Boden, reagiert kaum)";
+        pat.visibleInjuries = "Starke arterielle Blutung Oberschenkel re., blaue Lippen, Fehlstellung Unterschenkel.";
         pat.markers = [
           { view: "front", top: "65%", left: "30%", text: "Spritzende Blutung" },
           { view: "front", top: "75%", left: "60%", text: "Fehlstellung" }
@@ -477,7 +477,7 @@
           { letter: "B", label: "Breathing", val: "AF 32/min, zyanotisch, feuchte Nebengeräusche" },
           { letter: "C", label: "Circulation", val: "Puls radialis nicht tastbar, Karotis schwach" },
           { letter: "D", label: "Disability", val: "GCS 9 (V3, M4, O2), Pupillen träge" },
-          { letter: "E", label: "Exposure", val: "Hypothermie, Schürfwunden Rumpf" }
+          { letter: "E", label: "Exposure", val: "Kühle Haut, Schürfwunden Rumpf" }
         ];
         pat.sampler = [
           { key: "Symptome", val: "Starke Schmerzen, Dyspnoe" },
@@ -486,16 +486,16 @@
           { key: "Patientengesch.", val: "Keine Vorerkrankungen bekannt" },
           { key: "Letzte Mahlzeit", val: "Vor 3 Stunden" },
           { key: "Ereignis", val: "Vom LKW erfasst" },
-          { key: "Risikofaktoren", val: "Hämorrhagischer Schock" }
+          { key: "Risikofaktoren", val: "Blutverlust" }
         ];
         pat.scores = [
-          { key: "GCS", val: "9 Punkte (E2, V3, M4) - Mittelschweres SHT" },
+          { key: "GCS", val: "9 Punkte (E2, V3, M4)" },
           { key: "BE-FAST", val: "Auffällig (Motorische Reaktion / Armschwäche)" },
-          { key: "NEWS2-Score", val: "11 Punkte (Hohes Risiko für klinische Verschlechterung)" },
+          { key: "NEWS2-Score", val: "11 Punkte" },
           { key: "NEXUS-Kriterien", val: "Positiv (Schmerzhafte Ablenkungsverletzung, GCS < 15)" },
-          { key: "qSOFA-Score", val: "2 Punkte (AF >= 22, GCS < 15) - Sepsis-Risiko hoch" },
-          { key: "sPESI-Score", val: "2 Punkte (Puls >= 110, SpO2 < 90%) - Hohes Risiko" },
-          { key: "Wells-Score", val: "1.5 Punkte (Tachykardie > 100/min) - Mäßiges Risiko" },
+          { key: "qSOFA-Score", val: "2 Punkte (AF >= 22, GCS < 15)" },
+          { key: "sPESI-Score", val: "2 Punkte (Puls >= 110, SpO2 < 90%)" },
+          { key: "Wells-Score", val: "1.5 Punkte (Tachykardie > 100/min)" },
           { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
         ];
         pat.vitals = [
@@ -509,38 +509,38 @@
           { key: "etCO2", val: "26 mmHg" }
         ];
       } else if (type === 2) { // GELB (Triage 2)
-        pat.impression = "Wach, ansprechbar, starke Schmerzen, hält Arm fest.";
-        pat.walkingAbility = "Ja, mit Unterstützung (starke Armverletzung & Benommenheit)";
+        pat.impression = "Wach, ansprechbar, hält sich den Arm, gibt starke Schmerzen an.";
+        pat.walkingAbility = "Nein (bleibt sitzen, gibt Schwindel beim Aufstehen an)";
         pat.visibleInjuries = "Fehlstellung Unterarm li., Ruß um Mund und Nase, Schnittwunde Kopf.";
         pat.markers = [
           { view: "front", top: "12%", left: "30%", text: "Platzwunde" },
           { view: "front", top: "45%", left: "10%", text: "Unterarmfraktur" }
         ];
         pat.abcde = [
-          { letter: "x", label: "eXsanguination", val: "Keine kritische Blutung" },
+          { letter: "x", label: "eXsanguination", val: "Keine spritzende Blutung" },
           { letter: "A", label: "Airway", val: "Atemwege frei, Rußspuren oral" },
           { letter: "B", label: "Breathing", val: "AF 20/min, Vesikuläratmen bds." },
           { letter: "C", label: "Circulation", val: "Puls kräftig, regelmäßig" },
           { letter: "D", label: "Disability", val: "GCS 15, Pupillen isokor" },
-          { letter: "E", label: "Exposure", val: "Geschlossene Fraktur Li. Unterarm" }
+          { letter: "E", label: "Exposure", val: "Deformität Unterarm links" }
         ];
         pat.sampler = [
           { key: "Symptome", val: "Schmerzen Arm (7/10)" },
           { key: "Allergien", val: "Penicillin" },
           { key: "Medikation", val: "Ramipril 5mg" },
-          { key: "Patientengesch.", val: "Arterieller Hypertonus" },
+          { key: "Patientengesch.", val: "Bluthochdruck" },
           { key: "Letzte Mahlzeit", val: "Vor 1 Stunde" },
           { key: "Ereignis", val: "Explosion im Gebäude" },
-          { key: "Risikofaktoren", val: "Inhalationstrauma möglich" }
+          { key: "Risikofaktoren", val: "Rauchgas ausgesetzt" }
         ];
         pat.scores = [
-          { key: "GCS", val: "15 Punkte (E4, V5, M6) - Unauffällig" },
+          { key: "GCS", val: "15 Punkte (E4, V5, M6)" },
           { key: "BE-FAST", val: "Unauffällig" },
           { key: "NEWS2-Score", val: "1 Punkt (Atemfrequenz leicht erhöht)" },
           { key: "NEXUS-Kriterien", val: "Positiv (Schmerzhafte Ablenkungsverletzung Arm/Kopf)" },
-          { key: "qSOFA-Score", val: "0 Punkte - Niedriges Sepsis-Risiko" },
-          { key: "sPESI-Score", val: "0 Punkte - Niedriges Risiko" },
-          { key: "Wells-Score", val: "0 Punkte - Niedriges Risiko" },
+          { key: "qSOFA-Score", val: "0 Punkte" },
+          { key: "sPESI-Score", val: "0 Punkte" },
+          { key: "Wells-Score", val: "0 Punkte" },
           { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
         ];
         pat.vitals = [
@@ -554,9 +554,9 @@
           { key: "etCO2", val: "37 mmHg" }
         ];
       } else if (type === 3) { // GRÜN (Triage 3)
-        pat.impression = "Gehfähig, aufgeregt, leichtes Hinken.";
-        pat.walkingAbility = "Ja, eigenständig (Humpeln wegen Knie-Schürfwunde)";
-        pat.visibleInjuries = "Schürfwunden Knie li., Prellung Schulter re., blasse Haut.";
+        pat.impression = "Ansprechbar, aufgeregt, gestikuliert, blasse Haut.";
+        pat.walkingAbility = "Ja (läuft eigenständig, leichtes Humpeln)";
+        pat.visibleInjuries = "Schürfwunden Knie li., Prellung Schulter re.";
         pat.markers = [
           { view: "front", top: "68%", left: "25%", text: "Schürfwunde" },
           { view: "back", top: "22%", left: "55%", text: "Prellung Schulter" }
@@ -579,13 +579,13 @@
           { key: "Risikofaktoren", val: "Keine" }
         ];
         pat.scores = [
-          { key: "GCS", val: "15 Punkte (E4, V5, M6) - Unauffällig" },
+          { key: "GCS", val: "15 Punkte (E4, V5, M6)" },
           { key: "BE-FAST", val: "Unauffällig" },
-          { key: "NEWS2-Score", val: "0 Punkte - Kein erhöhtes Risiko" },
-          { key: "NEXUS-Kriterien", val: "Negativ (Kein HWK-Immobilisationsbedarf)" },
-          { key: "qSOFA-Score", val: "0 Punkte - Unauffällig" },
-          { key: "sPESI-Score", val: "0 Punkte - Unauffällig" },
-          { key: "Wells-Score", val: "0 Punkte - Niedriges Risiko" },
+          { key: "NEWS2-Score", val: "0 Punkte" },
+          { key: "NEXUS-Kriterien", val: "Negativ" },
+          { key: "qSOFA-Score", val: "0 Punkte" },
+          { key: "sPESI-Score", val: "0 Punkte" },
+          { key: "Wells-Score", val: "0 Punkte" },
           { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
         ];
         pat.vitals = [
@@ -599,20 +599,20 @@
           { key: "etCO2", val: "39 mmHg" }
         ];
       } else if (type === 4) { // SCHWARZ (Triage 4)
-        pat.impression = "Reglos, keine Atembewegung erkennbar.";
-        pat.walkingAbility = "Nein (Verstorben)";
-        pat.visibleInjuries = "Schwere Schädel-Hirn-Zertrümmerung, Amputation Oberschenkel li.";
+        pat.impression = "Reglos, keine Bewegung, keine Atembewegung sichtbar.";
+        pat.walkingAbility = "Nein (keine Reaktion auf Reize)";
+        pat.visibleInjuries = "Schwere Deformierung des Schädels, Abtrennung Oberschenkel li.";
         pat.markers = [
-          { view: "front", top: "8%", left: "25%", text: "Offenes SHT" },
-          { view: "front", top: "60%", left: "20%", text: "Amputation" }
+          { view: "front", top: "8%", left: "25%", text: "Schwere Schädelverletzung" },
+          { view: "front", top: "60%", left: "20%", text: "Abtrennung Extremität" }
         ];
         pat.abcde = [
-          { letter: "x", label: "eXsanguination", val: "Keine Aktionen möglich" },
+          { letter: "x", label: "eXsanguination", val: "Keine aktiven Maßnahmen möglich" },
           { letter: "A", label: "Airway", val: "Nicht frei / verlegt" },
-          { letter: "B", label: "Breathing", val: "Keine Spontanatmung (auch nach Esmarch)" },
-          { letter: "C", label: "Circulation", val: "Kein Puls (A. carotis 0)" },
+          { letter: "B", label: "Breathing", val: "Keine Spontanatmung (auch nach Atemwegsöffnung)" },
+          { letter: "C", label: "Circulation", val: "Kein Puls tastbar (A. carotis 0)" },
           { letter: "D", label: "Disability", val: "GCS 3, Pupillen weit & lichtstarr" },
-          { letter: "E", label: "Exposure", val: "Tödliche Verletzungen" }
+          { letter: "E", label: "Exposure", val: "Schwerste Verletzungen" }
         ];
         pat.sampler = [
           { key: "Symptome", val: "Keine Angaben möglich" },
@@ -624,9 +624,9 @@
           { key: "Risikofaktoren", val: "-" }
         ];
         pat.scores = [
-          { key: "GCS", val: "3 Punkte (E1, V1, M1) - Tiefe Bewusstlosigkeit / Tod" },
+          { key: "GCS", val: "3 Punkte (E1, V1, M1)" },
           { key: "BE-FAST", val: "Nicht beurteilbar" },
-          { key: "NEWS2-Score", val: "Maximaler Score / Reanimationsfrei" },
+          { key: "NEWS2-Score", val: "Maximaler Score" },
           { key: "NEXUS-Kriterien", val: "Nicht indiziert" },
           { key: "qSOFA-Score", val: "3 Punkte" },
           { key: "sPESI-Score", val: "Nicht indiziert" },
@@ -644,20 +644,20 @@
           { key: "etCO2", val: "0 mmHg" }
         ];
       } else { // BLAU / ROT (Triage Blau/Extrem kritisch)
-        pat.impression = "Schnappatmung, hochroter Kopf, starkes Schwitzen, Verbrennungen 3. Grades 80% KOF.";
-        pat.walkingAbility = "Nein (Rollstuhlfahrer / immobil, im Schockzustand)";
-        pat.visibleInjuries = "Grad III Verbrennungen Rumpf & Beine, Brandwunden Gesicht.";
+        pat.impression = "Unregelmäßige/sehr flache Atemzüge, hochrotes Gesicht, starkes Schwitzen, flächige Hautveränderungen.";
+        pat.walkingAbility = "Nein (liegt reglos am Boden)";
+        pat.visibleInjuries = "Flächige Verkohlungen/Blasenbildung Rumpf & Beine, Rußspuren Gesicht.";
         pat.markers = [
-          { view: "front", top: "30%", left: "25%", text: "Verbrennung 3°" },
-          { view: "back", top: "30%", left: "25%", text: "Verbrennung 3°" }
+          { view: "front", top: "30%", left: "25%", text: "Flächige Verbrennung" },
+          { view: "back", top: "30%", left: "25%", text: "Flächige Verbrennung" }
         ];
         pat.abcde = [
           { letter: "x", label: "eXsanguination", val: "Keine spritzenden Blutungen" },
-          { letter: "A", label: "Airway", val: "Inhalationstrauma schwerst, Ödem" },
-          { letter: "B", label: "Breathing", val: "Schnappatmung AF 4/min" },
+          { letter: "A", label: "Airway", val: "Atemwegsverlegung / Schwellung sichtbar" },
+          { letter: "B", label: "Breathing", val: "Unregelmäßige Atmung AF 4/min" },
           { letter: "C", label: "Circulation", val: "Puls zentral kaum tastbar, fadenförmig" },
           { letter: "D", label: "Disability", val: "GCS 4" },
-          { letter: "E", label: "Exposure", val: "Verbrennung >80% KOF" }
+          { letter: "E", label: "Exposure", val: "Großflächige Verbrennungen Rumpf/Extremitäten" }
         ];
         pat.sampler = [
           { key: "Symptome", val: "Keine zielgerichtete Reaktion" },
@@ -666,16 +666,16 @@
           { key: "Patientengesch.", val: "Unbekannt" },
           { key: "Letzte Mahlzeit", val: "Unbekannt" },
           { key: "Ereignis", val: "Direkte Flammeneinwirkung" },
-          { key: "Risikofaktoren", val: "Morbide Prognose" }
+          { key: "Risikofaktoren", val: "-" }
         ];
         pat.scores = [
-          { key: "GCS", val: "4 Punkte (E1, V1, M2) - Schwerstes SHT / Koma" },
-          { key: "BE-FAST", val: "Nicht beurteilbar (Keine Reaktion)" },
-          { key: "NEWS2-Score", val: "14 Punkte (Kritischer Zustand)" },
+          { key: "GCS", val: "4 Punkte (E1, V1, M2)" },
+          { key: "BE-FAST", val: "Nicht beurteilbar" },
+          { key: "NEWS2-Score", val: "14 Punkte" },
           { key: "NEXUS-Kriterien", val: "Positiv (GCS < 15, schwere Verbrennungen)" },
           { key: "qSOFA-Score", val: "3 Punkte (RR, AF, GCS stark verändert)" },
-          { key: "sPESI-Score", val: "3 Punkte - Höchstes Risiko" },
-          { key: "Wells-Score", val: "3.0 Punkte (Tachypnoe/Instabilität)" },
+          { key: "sPESI-Score", val: "3 Punkte" },
+          { key: "Wells-Score", val: "3.0 Punkte" },
           { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
         ];
         pat.vitals = [
