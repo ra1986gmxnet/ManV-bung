@@ -249,7 +249,7 @@
 
     .interactive-table tr {
       border-bottom: 1px solid var(--gray-medium);
-      height: 38px; /* Einheits-Höhe für alle Tabellenzeilen für exaktes Alignment */
+      height: 38px;
     }
 
     .interactive-table tr:last-child {
@@ -462,7 +462,7 @@
     </div>
   </div>
 
-  <!-- Detail-Spalten (Horizontale Synchronisation mit 10s Timer) -->
+  <!-- Detail-Spalten -->
   <div class="detail-grid">
     <!-- Linke Spalte -->
     <div>
@@ -474,7 +474,7 @@
         </table>
       </div>
 
-      <!-- SAMPLER (Parallel zu Scores) -->
+      <!-- SAMPLER -->
       <div class="card">
         <div class="card-header">SAMPLER Anamnese</div>
         <table class="interactive-table">
@@ -493,7 +493,7 @@
         </table>
       </div>
 
-      <!-- Klinische Scores & Assessment-Tools (Parallel zu SAMPLER) -->
+      <!-- Klinische Scores & Assessment-Tools -->
       <div class="card">
         <div class="card-header">Klinische Scores & Assessment-Tools</div>
         <table class="interactive-table">
@@ -507,20 +507,17 @@
 <script>
   let isTimerRunning = false;
 
-  // Pool für Risikofaktoren
-  const riskFactorPool = [
+  // Risikofaktoren-Pools getrennt nach Alter
+  const adultRiskPool = [
     "Keine bekannt",
     "Keine bekannt",
     "Keine wesentlichen Risikofaktoren",
     "Keine bekannt",
-    "Keine wesentlichen Risikofaktoren",
     "Adipositas Permagna (BMI > 35)",
     "Nikotinabusus (30 Pack Years)",
     "Chronischer Alkoholabusus",
-    "Medikamentenabhängigkeit (Benzodiazepine)",
     "Starker C2-Abusus",
     "Mangelernährung / Kachexie",
-    "Adipositas Grad I",
     "C2- und Nikotinabusus",
     "Drogenabusus (Polytoxikomanie)",
     "Diabetes Mellitus Typ 2",
@@ -528,23 +525,57 @@
     "Arterielle Hypertonie"
   ];
 
+  const pediatricRiskPool = [
+    "Keine bekannt",
+    "Keine bekannt",
+    "Keine bekannt",
+    "Keine bekannt",
+    "Keine bekannt",
+    "Keine bekannt",
+    "Frühgeburtlichkeit (32. SSW)",
+    "Erhöhte Infektanfälligkeit",
+    "Passivrauchbelastung im Haushalt",
+    "Bekannte Fieberkrämpfe in der Familie",
+    "Geringes Geburtsgewicht"
+  ];
+
+  // Anamnese-Pools (Medikation & Vorerkrankungen) für Kinder
+  const pedHistoryPool = [
+    { history: "Keine bekannt", med: "Keine Dauermedikation" },
+    { history: "Keine bekannt", med: "Keine Dauermedikation" },
+    { history: "Keine bekannt", med: "Keine Dauermedikation" },
+    { history: "Keine bekannt", med: "Keine Dauermedikation" },
+    { history: "Keine bekannt", med: "Keine Dauermedikation" },
+    { history: "Asthma bronchiale", med: "Salbutamol Inhalationsspray (p.n.)" },
+    { history: "Neurodermitis", med: "Pflegecreme / Mometason Salbe" },
+    { history: "Z.n. Fieberkrampf (einmalig)", med: "Diazepam Rectiole (Bedarfsmedikation)" },
+    { history: "Infekt der oberen Atemwege", med: "Ibuprofen Saft (p.n.)" },
+    { history: "Gedeihstörung / Unverträglichkeit", med: "Spezialnahrung" }
+  ];
+
+  // Anamnese-Pools für Erwachsene
+  const adultHistoryPool = [
+    { history: "Arterielle Hypertonie", med: "Ramipril 5mg 1-0-0" },
+    { history: "Diabetes Mellitus Typ 2", med: "Metformin 850mg 1-0-1" },
+    { history: "Z.n. Myokardinfarkt, KHK", med: "ASS 100mg, Bisoprolol 5mg" },
+    { history: "COPD II", med: "Spiriva 18µg, Salbutamol p.n." },
+    { history: "Keine bekannt", med: "Keine Dauermedikation" },
+    { history: "Bluthochdruck, Hypercholesterinämie", med: "Amlodipin 10mg, Simvastatin 20mg" }
+  ];
+
   // Funktion zur Schätzung des Alters bei Bewusstlosen
   function getEstimatedAgeString(ageInYears) {
-    // 1. Neugeborene (< 1 Monat / ca. 0.08 Jahre)
     if (ageInYears < 0.08) {
       const days = Math.max(1, Math.floor(ageInYears * 365));
       return `ca. ${days} Tage`;
     }
-    // 2. Babys / Säuglinge (< 1 Jahr)
     if (ageInYears < 1.0) {
       const months = Math.max(1, Math.floor(ageInYears * 12));
       return `ca. ${months} Monate`;
     }
-    // 3. Kleinkinder & Kinder (1 - 12 Jahre)
     if (ageInYears <= 12) {
       return `ca. ${Math.round(ageInYears)} Jahre`;
     }
-    // 4. Jugendliche & Erwachsene (> 12 Jahre) - Differenzierte Schätzung
     const exactAge = Math.round(ageInYears);
     const lastDigit = exactAge % 10;
     const decade = Math.floor(exactAge / 10) * 10;
@@ -573,7 +604,6 @@
       const fn = isFemale ? firstnamesF[i % firstnamesF.length] : firstnamesM[i % firstnamesM.length];
       const ln = names[i % names.length];
       
-      // Berechne dynamisches Alter inkl. Babys / Kinder für realistischere Übungen
       let ageInYears;
       if (i % 15 === 0) {
         ageInYears = 0.02; // Neugeborenes (ca. 7 Tage)
@@ -585,17 +615,34 @@
         ageInYears = 15 + (i * 7) % 65; // Erwachsener
       }
 
+      const isChild = ageInYears < 14;
       const gender = isFemale ? "weiblich" : "männlich";
       
-      const riskIndex = (i * 13 + 7) % riskFactorPool.length;
-      const riskFactor = riskFactorPool[riskIndex];
+      // Risikofaktoren altersgerecht zuweisen
+      let riskFactor = "";
+      if (isChild) {
+        const riskIdx = (i * 7) % pediatricRiskPool.length;
+        riskFactor = pediatricRiskPool[riskIdx];
+      } else {
+        const riskIdx = (i * 13 + 7) % adultRiskPool.length;
+        riskFactor = adultRiskPool[riskIdx];
+      }
+
+      // Vorerkrankungen & Medikation altersgerecht zuweisen
+      let historyItem = {};
+      if (isChild) {
+        const histIdx = (i * 5) % pedHistoryPool.length;
+        historyItem = pedHistoryPool[histIdx];
+      } else {
+        const histIdx = (i * 3) % adultHistoryPool.length;
+        historyItem = adultHistoryPool[histIdx];
+      }
 
       let type = i % 5; 
       
       // Bewusstlos / Nicht ansprechbar Check
-      const isUnconscious = (type === 1 || type === 4 || type === 0); // Rot, Schwarz, Blau
+      const isUnconscious = (type === 1 || type === 4 || type === 0);
 
-      // Altersstring-Generierung nach neuen Vorgaben:
       let ageGenderString = "";
       if (isUnconscious) {
         const estimatedAge = getEstimatedAgeString(ageInYears);
@@ -634,36 +681,36 @@
         pat.abcde = [
           { letter: "x", label: "eXsanguination", val: "Kritische Blutung A. femoralis rechts" },
           { letter: "A", label: "Airway", val: "Atemwege frei" },
-          { letter: "B", label: "Breathing", val: "AF 32/min, zyanotisch, feuchte Nebengeräusche" },
-          { letter: "C", label: "Circulation", val: "Puls radialis nicht tastbar, Karotis schwach" },
+          { letter: "B", label: "Breathing", val: "AF stark erhöht, zyanotisch, feuchte Nebengeräusche" },
+          { letter: "C", label: "Circulation", val: "Puls peripher nicht tastbar, zentral schwach" },
           { letter: "D", label: "Disability", val: "GCS 9 (V3, M4, O2), Pupillen träge" },
           { letter: "E", label: "Exposure", val: "Kühle Haut, Schürfwunden Rumpf" }
         ];
         pat.sampler = [
           { key: "Symptome", val: "Patient nicht ansprechbar" },
           { key: "Allergien", val: "Unbekannt" },
-          { key: "Medikation", val: "Unbekannt" },
-          { key: "Patientengesch.", val: "Unbekannt" },
+          { key: "Medikation", val: isUnconscious ? "Unbekannt" : historyItem.med },
+          { key: "Patientengesch.", val: isUnconscious ? "Unbekannt" : historyItem.history },
           { key: "Letzte Mahlzeit", val: "Unbekannt" },
-          { key: "Ereignis", val: "Vom LKW erfasst" },
+          { key: "Ereignis", val: "Schwerer Verkehrsunfall" },
           { key: "Risikofaktoren", val: riskFactor }
         ];
         pat.scores = [
           { key: "GCS", val: "9 Punkte (E2, V3, M4)" },
-          { key: "BE-FAST", val: "Auffällig (Motorische Reaktion / Armschwäche)" },
+          { key: "BE-FAST", val: "Auffällig (Motorische Reaktion)" },
           { key: "NEWS2-Score", val: "11 Punkte" },
           { key: "NEXUS-Kriterien", val: "Positiv (Schmerzhafte Ablenkungsverletzung, GCS < 15)" },
-          { key: "qSOFA-Score", val: "2 Punkte (AF >= 22, GCS < 15)" },
-          { key: "sPESI-Score", val: "2 Punkte (Puls >= 110, SpO2 < 90%)" },
-          { key: "Wells-Score", val: "1.5 Punkte (Tachykardie > 100/min)" },
-          { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
+          { key: "qSOFA-Score", val: "2 Punkte" },
+          { key: "sPESI-Score", val: "2 Punkte" },
+          { key: "Wells-Score", val: "1.5 Punkte" },
+          { key: "APGAR-Schema", val: ageInYears < 0.08 ? "7/8/9 (Neugeborenes)" : "Nicht anwendbar" }
         ];
         pat.vitals = [
           { key: "ReKap-Zeit", val: "> 2 Sek (verzögert)" },
-          { key: "Puls", val: "145 bpm (fadenförmig)" },
+          { key: "Puls", val: isChild ? "165 bpm (Tachykard)" : "145 bpm (fadenförmig)" },
           { key: "SpO2", val: "82 %" },
-          { key: "Blutdruck", val: "75/40 mmHg" },
-          { key: "Atemfrequenz", val: "32 / min" },
+          { key: "Blutdruck", val: isChild ? "65/35 mmHg" : "75/40 mmHg" },
+          { key: "Atemfrequenz", val: isChild ? "45 / min" : "32 / min" },
           { key: "Blutzucker", val: "110 mg/dl" },
           { key: "Temperatur", val: "35.2 °C" },
           { key: "etCO2", val: "26 mmHg" }
@@ -679,36 +726,36 @@
         pat.abcde = [
           { letter: "x", label: "eXsanguination", val: "Keine spritzende Blutung" },
           { letter: "A", label: "Airway", val: "Atemwege frei, Rußspuren oral" },
-          { letter: "B", label: "Breathing", val: "AF 20/min, Vesikuläratmen bds." },
+          { letter: "B", label: "Breathing", val: "AF leicht erhöht, Vesikuläratmen bds." },
           { letter: "C", label: "Circulation", val: "Puls kräftig, regelmäßig" },
           { letter: "D", label: "Disability", val: "GCS 15, Pupillen isokor" },
           { letter: "E", label: "Exposure", val: "Deformität Unterarm links" }
         ];
         pat.sampler = [
           { key: "Symptome", val: "Schmerzen Arm (7/10)" },
-          { key: "Allergien", val: "Penicillin" },
-          { key: "Medikation", val: "Ramipril 5mg" },
-          { key: "Patientengesch.", val: "Bluthochdruck" },
+          { key: "Allergien", val: isChild ? "Keine bekannten Allergien" : "Penicillin" },
+          { key: "Medikation", val: historyItem.med },
+          { key: "Patientengesch.", val: historyItem.history },
           { key: "Letzte Mahlzeit", val: "Vor 1 Stunde" },
-          { key: "Ereignis", val: "Explosion im Gebäude" },
+          { key: "Ereignis", val: "Explosion / Brandereignis" },
           { key: "Risikofaktoren", val: riskFactor }
         ];
         pat.scores = [
           { key: "GCS", val: "15 Punkte (E4, V5, M6)" },
           { key: "BE-FAST", val: "Unauffällig" },
-          { key: "NEWS2-Score", val: "1 Punkt (Atemfrequenz leicht erhöht)" },
-          { key: "NEXUS-Kriterien", val: "Positiv (Schmerzhafte Ablenkungsverletzung Arm/Kopf)" },
+          { key: "NEWS2-Score", val: "1 Punkt" },
+          { key: "NEXUS-Kriterien", val: "Positiv (Ablenkungsverletzung Arm/Kopf)" },
           { key: "qSOFA-Score", val: "0 Punkte" },
           { key: "sPESI-Score", val: "0 Punkte" },
           { key: "Wells-Score", val: "0 Punkte" },
-          { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
+          { key: "APGAR-Schema", val: ageInYears < 0.08 ? "9/10/10 (Neugeborenes)" : "Nicht anwendbar" }
         ];
         pat.vitals = [
           { key: "ReKap-Zeit", val: "< 2 Sek (normal)" },
-          { key: "Puls", val: "92 bpm" },
+          { key: "Puls", val: isChild ? "110 bpm" : "92 bpm" },
           { key: "SpO2", val: "96 %" },
-          { key: "Blutdruck", val: "135/85 mmHg" },
-          { key: "Atemfrequenz", val: "20 / min" },
+          { key: "Blutdruck", val: isChild ? "95/60 mmHg" : "135/85 mmHg" },
+          { key: "Atemfrequenz", val: isChild ? "26 / min" : "20 / min" },
           { key: "Blutzucker", val: "125 mg/dl" },
           { key: "Temperatur", val: "36.8 °C" },
           { key: "etCO2", val: "37 mmHg" }
@@ -732,8 +779,8 @@
         pat.sampler = [
           { key: "Symptome", val: "Leichte Schmerzen Knie" },
           { key: "Allergien", val: "Keine" },
-          { key: "Medikation", val: "Keine" },
-          { key: "Patientengesch.", val: "Keine" },
+          { key: "Medikation", val: historyItem.med },
+          { key: "Patientengesch.", val: historyItem.history },
           { key: "Letzte Mahlzeit", val: "Vor 4 Stunden" },
           { key: "Ereignis", val: "Sturz beim Flüchten" },
           { key: "Risikofaktoren", val: riskFactor }
@@ -746,14 +793,14 @@
           { key: "qSOFA-Score", val: "0 Punkte" },
           { key: "sPESI-Score", val: "0 Punkte" },
           { key: "Wells-Score", val: "0 Punkte" },
-          { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
+          { key: "APGAR-Schema", val: ageInYears < 0.08 ? "10/10/10 (Neugeborenes)" : "Nicht anwendbar" }
         ];
         pat.vitals = [
           { key: "ReKap-Zeit", val: "< 2 Sek (normal)" },
-          { key: "Puls", val: "80 bpm" },
+          { key: "Puls", val: isChild ? "98 bpm" : "80 bpm" },
           { key: "SpO2", val: "99 %" },
-          { key: "Blutdruck", val: "120/80 mmHg" },
-          { key: "Atemfrequenz", val: "14 / min" },
+          { key: "Blutdruck", val: isChild ? "90/55 mmHg" : "120/80 mmHg" },
+          { key: "Atemfrequenz", val: isChild ? "22 / min" : "14 / min" },
           { key: "Blutzucker", val: "98 mg/dl" },
           { key: "Temperatur", val: "36.5 °C" },
           { key: "etCO2", val: "39 mmHg" }
@@ -770,7 +817,7 @@
           { letter: "x", label: "eXsanguination", val: "Keine aktiven Maßnahmen möglich" },
           { letter: "A", label: "Airway", val: "Nicht frei / verlegt" },
           { letter: "B", label: "Breathing", val: "Keine Spontanatmung (auch nach Atemwegsöffnung)" },
-          { letter: "C", label: "Circulation", val: "Kein Puls tastbar (A. carotis 0)" },
+          { letter: "C", label: "Circulation", val: "Kein Puls tastbar (Zentral 0)" },
           { letter: "D", label: "Disability", val: "GCS 3, Pupillen weit & lichtstarr" },
           { letter: "E", label: "Exposure", val: "Schwerste Verletzungen" }
         ];
@@ -791,7 +838,7 @@
           { key: "qSOFA-Score", val: "3 Punkte" },
           { key: "sPESI-Score", val: "Nicht indiziert" },
           { key: "Wells-Score", val: "Nicht indiziert" },
-          { key: "APGAR-Schema", val: "Nicht anwendbar" }
+          { key: "APGAR-Schema", val: ageInYears < 0.08 ? "0/0/0 (Neugeborenes)" : "Nicht anwendbar" }
         ];
         pat.vitals = [
           { key: "ReKap-Zeit", val: "> 2 Sek (keine Perfusion)" },
@@ -814,7 +861,7 @@
         pat.abcde = [
           { letter: "x", label: "eXsanguination", val: "Keine spritzenden Blutungen" },
           { letter: "A", label: "Airway", val: "Atemwegsverlegung / Schwellung sichtbar" },
-          { letter: "B", label: "Breathing", val: "Unregelmäßige Atmung AF 4/min" },
+          { letter: "B", label: "Breathing", val: "Unregelmäßige/insuffiziente Atmung" },
           { letter: "C", label: "Circulation", val: "Puls zentral kaum tastbar, fadenförmig" },
           { letter: "D", label: "Disability", val: "GCS 4" },
           { letter: "E", label: "Exposure", val: "Großflächige Verbrennungen Rumpf/Extremitäten" }
@@ -822,8 +869,8 @@
         pat.sampler = [
           { key: "Symptome", val: "Keine zielgerichtete Reaktion" },
           { key: "Allergien", val: "Unbekannt" },
-          { key: "Medikation", val: "Unbekannt" },
-          { key: "Patientengesch.", val: "Unbekannt" },
+          { key: "Medikation", val: isUnconscious ? "Unbekannt" : historyItem.med },
+          { key: "Patientengesch.", val: isUnconscious ? "Unbekannt" : historyItem.history },
           { key: "Letzte Mahlzeit", val: "Unbekannt" },
           { key: "Ereignis", val: "Direkte Flammeneinwirkung" },
           { key: "Risikofaktoren", val: riskFactor }
@@ -833,16 +880,16 @@
           { key: "BE-FAST", val: "Nicht beurteilbar" },
           { key: "NEWS2-Score", val: "14 Punkte" },
           { key: "NEXUS-Kriterien", val: "Positiv (GCS < 15, schwere Verbrennungen)" },
-          { key: "qSOFA-Score", val: "3 Punkte (RR, AF, GCS stark verändert)" },
+          { key: "qSOFA-Score", val: "3 Punkte" },
           { key: "sPESI-Score", val: "3 Punkte" },
           { key: "Wells-Score", val: "3.0 Punkte" },
-          { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
+          { key: "APGAR-Schema", val: ageInYears < 0.08 ? "2/3/4 (Neugeborenes)" : "Nicht anwendbar" }
         ];
         pat.vitals = [
           { key: "ReKap-Zeit", val: "> 2 Sek (verzögert)" },
-          { key: "Puls", val: "40 bpm" },
+          { key: "Puls", val: isChild ? "55 bpm (Bradykard für Pädiatrie)" : "40 bpm" },
           { key: "SpO2", val: "55 %" },
-          { key: "Blutdruck", val: "50/20 mmHg" },
+          { key: "Blutdruck", val: isChild ? "40/20 mmHg" : "50/20 mmHg" },
           { key: "Atemfrequenz", val: "4 / min" },
           { key: "Blutzucker", val: "160 mg/dl" },
           { key: "Temperatur", val: "34.8 °C" },
@@ -893,7 +940,6 @@
           </td>
         `;
       } else {
-        // Leere Zeile ohne Inhalt
         tr.innerHTML = `
           <td class="param-label">&nbsp;</td>
           <td class="param-action">&nbsp;</td>
@@ -919,7 +965,7 @@
     document.getElementById('real-val-header-walking').innerText = p.walkingAbility;
     document.getElementById('real-val-header-injuries').innerText = p.visibleInjuries;
 
-    // Körper-Marker vorbereiten (aber vorerst ausgeblendet lassen)
+    // Körper-Marker vorbereiten
     p.markers.forEach(m => {
       const container = document.getElementById(m.view === 'front' ? 'front-view' : 'back-view');
       const markerEl = document.createElement('div');
@@ -937,7 +983,7 @@
     renderTableSection('table-scores', p.scores, 'scores', 8);
   }
 
-  // Universelle Countdown-Funktion (unterstützt dynamische Dauer: 5s oder 10s sowie Callback-Funktionen)
+  // Universelle Countdown-Funktion
   function runCountdown(rowId, duration, onCompleteCallback) {
     if (isTimerRunning) {
       showGlobalAlert();
@@ -978,7 +1024,6 @@
     }, 1000);
   }
 
-  // Blendet die Körper-Marker nach Ablauf des Schema-Timers ein
   function revealBodyMarkers() {
     const markers = document.querySelectorAll('.injury-marker');
     markers.forEach(m => m.style.display = 'block');
