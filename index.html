@@ -507,7 +507,7 @@
 <script>
   let isTimerRunning = false;
 
-  // Erweiterter Pool für eine bessere Durchmischung
+  // Pool für Risikofaktoren
   const riskFactorPool = [
     "Keine bekannt",
     "Keine bekannt",
@@ -528,6 +528,38 @@
     "Arterielle Hypertonie"
   ];
 
+  // Funktion zur Schätzung des Alters bei Bewusstlosen
+  function getEstimatedAgeString(ageInYears) {
+    // 1. Neugeborene (< 1 Monat / ca. 0.08 Jahre)
+    if (ageInYears < 0.08) {
+      const days = Math.max(1, Math.floor(ageInYears * 365));
+      return `ca. ${days} Tage`;
+    }
+    // 2. Babys / Säuglinge (< 1 Jahr)
+    if (ageInYears < 1.0) {
+      const months = Math.max(1, Math.floor(ageInYears * 12));
+      return `ca. ${months} Monate`;
+    }
+    // 3. Kleinkinder & Kinder (1 - 12 Jahre)
+    if (ageInYears <= 12) {
+      return `ca. ${Math.round(ageInYears)} Jahre`;
+    }
+    // 4. Jugendliche & Erwachsene (> 12 Jahre) - Differenzierte Schätzung
+    const exactAge = Math.round(ageInYears);
+    const lastDigit = exactAge % 10;
+    const decade = Math.floor(exactAge / 10) * 10;
+
+    if (lastDigit >= 1 && lastDigit <= 3) {
+      return `Anfang ${decade}`;
+    } else if (lastDigit >= 4 && lastDigit <= 6) {
+      return `Mitte ${decade}`;
+    } else if (lastDigit >= 7 && lastDigit <= 9) {
+      return `Ende ${decade}`;
+    } else {
+      return `ca. ${exactAge} Jahre`;
+    }
+  }
+
   // 100 Patienten Generator
   function generatePatients() {
     const names = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann"];
@@ -540,7 +572,19 @@
       const isFemale = i % 2 === 0;
       const fn = isFemale ? firstnamesF[i % firstnamesF.length] : firstnamesM[i % firstnamesM.length];
       const ln = names[i % names.length];
-      const age = 15 + (i * 7) % 65;
+      
+      // Berechne dynamisches Alter inkl. Babys / Kinder für realistischere Übungen
+      let ageInYears;
+      if (i % 15 === 0) {
+        ageInYears = 0.02; // Neugeborenes (ca. 7 Tage)
+      } else if (i % 10 === 0) {
+        ageInYears = 0.5; // Baby (ca. 6 Monate)
+      } else if (i % 7 === 0) {
+        ageInYears = 4; // Kind (4 Jahre)
+      } else {
+        ageInYears = 15 + (i * 7) % 65; // Erwachsener
+      }
+
       const gender = isFemale ? "weiblich" : "männlich";
       
       const riskIndex = (i * 13 + 7) % riskFactorPool.length;
@@ -551,11 +595,24 @@
       // Bewusstlos / Nicht ansprechbar Check
       const isUnconscious = (type === 1 || type === 4 || type === 0); // Rot, Schwarz, Blau
 
+      // Altersstring-Generierung nach neuen Vorgaben:
+      let ageGenderString = "";
+      if (isUnconscious) {
+        const estimatedAge = getEstimatedAgeString(ageInYears);
+        ageGenderString = `${estimatedAge} / ${gender}`;
+      } else {
+        if (ageInYears < 1) {
+          const m = Math.max(1, Math.floor(ageInYears * 12));
+          ageGenderString = `${m} Mon. / ${gender}`;
+        } else {
+          ageGenderString = `${Math.round(ageInYears)} J. / ${gender}`;
+        }
+      }
+
       let pat = {
         id: i,
-        // Regel: Bewusstlose/Nicht ansprechbare Patienten haben Unbekannte Stammdaten
         name: isUnconscious ? "Unbekannt" : `${ln}, ${fn}`,
-        ageGender: isUnconscious ? `Unbekannt / ${gender}` : `${age} J. / ${gender}`,
+        ageGender: ageGenderString,
         impression: "",
         walkingAbility: "",
         visibleInjuries: "",
