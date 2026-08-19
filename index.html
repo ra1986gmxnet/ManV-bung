@@ -342,6 +342,9 @@
     <div class="info-box" style="margin-top:6px;">
       <label>Ersteindruck</label><span id="pat-impression">-</span>
     </div>
+    <div class="info-box" style="margin-top:6px;">
+      <label>Gehfähigkeit</label><span id="pat-walking-ability">-</span>
+    </div>
     <div class="info-box alert-box" style="margin-top:6px;">
       <label style="color: var(--ral-3024);">Offensichtliche Verletzungen / Erkrankungen</label>
       <span id="pat-visible-injuries" style="font-weight: bold; color: var(--ral-3024);">-</span>
@@ -454,6 +457,7 @@
         name: `${ln}, ${fn}`,
         ageGender: `${age} J. / ${gender}`,
         impression: "",
+        walkingAbility: "",
         visibleInjuries: "",
         markers: [],
         abcde: [],
@@ -464,6 +468,7 @@
 
       if (type === 1) { // ROT (Triage 1)
         pat.impression = "Apathisch, kaltschweißig, schwere Atemnot.";
+        pat.walkingAbility = "Nein (nicht gehfähig, im Schockzustand)";
         pat.visibleInjuries = "Starke arterielle Blutung Oberschenkel re., Zyanose, Fehlstellung Unterschenkel.";
         pat.markers = [
           { view: "front", top: "65%", left: "30%", text: "Spritzende Blutung" },
@@ -508,6 +513,7 @@
         ];
       } else if (type === 2) { // GELB (Triage 2)
         pat.impression = "Wach, ansprechbar, starke Schmerzen, hält Arm fest.";
+        pat.walkingAbility = "Ja, mit Unterstützung (starke Armverletzung & Benommenheit)";
         pat.visibleInjuries = "Fehlstellung Unterarm li., Ruß um Mund und Nase, Schnittwunde Kopf.";
         pat.markers = [
           { view: "front", top: "12%", left: "30%", text: "Platzwunde" },
@@ -552,6 +558,7 @@
         ];
       } else if (type === 3) { // GRÜN (Triage 3)
         pat.impression = "Gehfähig, aufgeregt, leichtes Hinken.";
+        pat.walkingAbility = "Ja, eigenständig (Humpeln wegen Knie-Schürfwunde)";
         pat.visibleInjuries = "Schürfwunden Knie li., Prellung Schulter re., blasse Haut.";
         pat.markers = [
           { view: "front", top: "68%", left: "25%", text: "Schürfwunde" },
@@ -596,6 +603,7 @@
         ];
       } else if (type === 4) { // SCHWARZ (Triage 4)
         pat.impression = "Reglos, keine Atembewegung erkennbar.";
+        pat.walkingAbility = "Nein (Verstorben)";
         pat.visibleInjuries = "Schwere Schädel-Hirn-Zertrümmerung, Amputation Oberschenkel li.";
         pat.markers = [
           { view: "front", top: "8%", left: "25%", text: "Offenes SHT" },
@@ -640,6 +648,7 @@
         ];
       } else { // BLAU / ROT (Triage Blau/Extrem kritisch)
         pat.impression = "Schnappatmung, hochroter Kopf, starkes Schwitzen, Verbrennungen 3. Grades 80% KOF.";
+        pat.walkingAbility = "Nein (Rollstuhlfahrer / immobil, im Schockzustand)";
         pat.visibleInjuries = "Grad III Verbrennungen Rumpf & Beine, Brandwunden Gesicht.";
         pat.markers = [
           { view: "front", top: "30%", left: "25%", text: "Verbrennung 3°" },
@@ -735,6 +744,7 @@
     document.getElementById('pat-name').innerText = p.name;
     document.getElementById('pat-age-gender').innerText = p.ageGender;
     document.getElementById('pat-impression').innerText = p.impression;
+    document.getElementById('pat-walking-ability').innerText = p.walkingAbility;
     document.getElementById('pat-visible-injuries').innerText = p.visibleInjuries;
 
     // Körper-Marker
