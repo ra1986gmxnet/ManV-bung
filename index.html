@@ -354,14 +354,29 @@
   <div class="patient-header">
     <div class="section-title">Ersteinschätzung</div>
     <div class="grid-2">
+      <!-- Name, Vorname mit 5s Timer -->
       <div class="info-box">
         <div class="info-box-content">
-          <label>Name, Vorname</label><span id="pat-name">-</span>
+          <label>Name, Vorname</label>
+          <span id="val-header-name" class="hidden-val">---</span>
+          <span id="real-val-header-name" style="display:none;"></span>
+        </div>
+        <div class="info-box-action">
+          <button class="btn-start" id="btn-header-name" onclick="runCountdown('header-name', 5)">Start</button>
+          <span class="timer-text" id="timer-header-name" style="display:none;">5s</span>
         </div>
       </div>
+
+      <!-- Alter / Geschlecht mit 5s Timer -->
       <div class="info-box">
         <div class="info-box-content">
-          <label>Alter / Geschlecht</label><span id="pat-age-gender">-</span>
+          <label>Alter / Geschlecht</label>
+          <span id="val-header-age-gender" class="hidden-val">---</span>
+          <span id="real-val-header-age-gender" style="display:none;"></span>
+        </div>
+        <div class="info-box-action">
+          <button class="btn-start" id="btn-header-age-gender" onclick="runCountdown('header-age-gender', 5)">Start</button>
+          <span class="timer-text" id="timer-header-age-gender" style="display:none;">5s</span>
         </div>
       </div>
     </div>
@@ -492,7 +507,7 @@
 <script>
   let isTimerRunning = false;
 
-  // Erweiterter Pool für eine bessere Durchmischung (ca. 50% "Keine"-Einträge)
+  // Erweiterter Pool für eine bessere Durchmischung
   const riskFactorPool = [
     "Keine bekannt",
     "Keine bekannt",
@@ -838,9 +853,9 @@
 
     if (!p) return;
 
-    // Stammdaten direkt setzen
-    document.getElementById('pat-name').innerText = p.name;
-    document.getElementById('pat-age-gender').innerText = p.ageGender;
+    // Versteckte Stammdaten im DOM hinterlegen
+    document.getElementById('real-val-header-name').innerText = p.name;
+    document.getElementById('real-val-header-age-gender').innerText = p.ageGender;
 
     // Versteckte Texte für den oberen Abschnitt hinterlegen
     document.getElementById('real-val-header-impression').innerText = p.impression;
