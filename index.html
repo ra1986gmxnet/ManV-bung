@@ -6,37 +6,42 @@
   <title>MANV Sichtungsübung - Rettungsdienst Protokoll</title>
   <style>
     :root {
-      --ral-3024: #FF2A00; /* Tagesleuchtrot */
-      --ral-1026: #E5F30B; /* Leuchtgelb */
+      /* RAL Originalfarbtöne Rettungsdienst */
+      --ral-3024: #FF2A00; /* Tagesleuchtrot / Leuchtrot */
+      --ral-1026: #D2E100; /* Leuchtgelb / Neon */
       --ral-5002: #00209F; /* Signalblau */
-      --bg-color: #EBF0F5;
+      
+      --bg-color: #0b1325;
       --card-bg: #FFFFFF;
-      --text-color: #000000;
-      --border-color: #2C3E50;
-      --gray-light: #F1F4F8;
-      --gray-medium: #D1D8E0;
-      --gray-dark: #34495E;
+      --text-color: #1e293b;
+      --border-color: #1a237e;
+      --gray-light: #f8fafc;
+      --gray-medium: #cbd5e1;
+      --gray-dark: #334155;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
-      padding: 10px;
+      padding: 12px;
       line-height: 1.3;
     }
 
+    /* Container im Style eines digitalen Einsatz-Tablets */
     .container {
-      max-width: 1050px;
+      max-width: 1100px;
       margin: 0 auto;
-      background: var(--card-bg);
+      background: #eef2f6;
       border: 4px solid var(--ral-5002);
-      border-radius: 6px;
+      border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+      box-shadow: 0 0 25px rgba(0,0,0,0.6);
     }
 
+    /* Header mit Signalblau & Tagesleuchtrot-Akzenten */
     header {
       background-color: var(--ral-5002);
       color: #FFFFFF;
@@ -47,29 +52,55 @@
     }
 
     header h1 { 
-      font-size: 1.4rem; 
-      text-transform: uppercase; 
-      letter-spacing: 1.5px;
+      font-size: 1.25rem; 
       font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #ffffff;
     }
 
+    header::after {
+      content: '';
+      display: block;
+      height: 4px;
+      background: var(--ral-1026);
+      width: 100%;
+      position: absolute;
+      bottom: -9px;
+      left: 0;
+    }
+
+    /* Warnbanner / Statuszeile */
+    .alert-banner {
+      background: var(--ral-1026);
+      color: #000000;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      text-align: center;
+      font-weight: 700;
+      border-bottom: 3px solid var(--ral-3024);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    /* Sektions-Titel */
     .section-title {
-      background: var(--gray-dark);
+      background: var(--ral-5002);
       color: #FFFFFF;
       padding: 6px 12px;
-      font-weight: bold;
-      font-size: 0.9rem;
-      text-transform: uppercase;
+      font-weight: 700;
+      font-size: 0.85rem;
       border-left: 6px solid var(--ral-1026);
       margin-bottom: 8px;
-      letter-spacing: 0.5px;
+      border-radius: 2px;
     }
 
-    /* Ersteinschätzung */
+    /* Ersteinschätzung Panel */
     .patient-header {
       padding: 12px;
-      border-bottom: 2px solid var(--border-color);
-      background: #FAFAFA;
+      border-bottom: 3px solid var(--ral-5002);
+      background: #FFFFFF;
     }
 
     .grid-2 {
@@ -79,85 +110,94 @@
     }
 
     .info-box {
-      background: var(--card-bg);
-      padding: 6px 10px;
+      background: var(--gray-light);
+      padding: 8px 12px;
       border-radius: 4px;
       border: 1px solid var(--gray-medium);
+      border-left: 4px solid var(--ral-5002);
     }
 
     .info-box label {
-      font-weight: bold;
+      font-weight: 700;
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--gray-dark);
-      text-transform: uppercase;
+      margin-bottom: 2px;
     }
 
     .info-box span {
       font-size: 0.95rem;
+      font-weight: 600;
     }
 
-    /* Personenschema */
+    .alert-box {
+      border-left: 4px solid var(--ral-3024) !important;
+      background: #fff5f5;
+    }
+
+    /* Personenschema Sektion */
     .body-schema-section {
       padding: 12px;
-      border-bottom: 2px solid var(--border-color);
-      background: #FFF;
+      border-bottom: 3px solid var(--ral-5002);
+      background: #FFFFFF;
       text-align: center;
     }
 
     .body-container {
       display: flex;
       justify-content: center;
-      gap: 30px;
-      margin-top: 8px;
+      gap: 40px;
+      margin-top: 10px;
       flex-wrap: wrap;
     }
 
     .body-view {
       position: relative;
       width: 120px;
-      height: 260px;
-      border: 2px dashed var(--gray-dark);
-      background: var(--gray-light);
-      border-radius: 8px;
+      height: 250px;
+      border: 2px solid var(--ral-5002);
+      background: #f8fafc;
+      border-radius: 6px;
+      padding: 5px;
     }
 
     .body-label {
-      font-weight: bold;
+      font-weight: 700;
       font-size: 0.8rem;
-      margin-bottom: 4px;
-      text-transform: uppercase;
+      margin-bottom: 6px;
+      color: var(--ral-5002);
     }
 
     .body-svg {
       width: 100%;
       height: 100%;
-      fill: #CBD5E1;
-      stroke: #334155;
-      stroke-width: 2;
+      fill: #cbd5e1;
+      stroke: var(--ral-5002);
+      stroke-width: 1.5;
     }
 
+    /* Marker für Verletzungen (Tagesleuchtrot) */
     .injury-marker {
       position: absolute;
       background: var(--ral-3024);
-      color: #FFF;
+      color: #FFFFFF;
       font-size: 0.65rem;
-      font-weight: bold;
-      padding: 2px 5px;
+      font-weight: 700;
+      padding: 2px 6px;
       border-radius: 3px;
       border: 1px solid #000;
       white-space: nowrap;
       z-index: 10;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
     }
 
-    /* Unterer Bereich (2 Spalten) */
+    /* Detail-Raster (Zwei-Spalten Dashboard) */
     .detail-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       padding: 12px;
-      background: var(--bg-color);
+      background: #eef2f6;
     }
 
     @media (max-width: 768px) {
@@ -171,22 +211,24 @@
     }
 
     .card {
-      border: 2px solid var(--border-color);
-      border-radius: 5px;
-      background: #FFF;
+      border: 2px solid var(--ral-5002);
+      border-radius: 4px;
+      background: #FFFFFF;
       overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 
     .card-header {
       background: var(--ral-5002);
-      color: #FFF;
+      color: #FFFFFF;
       padding: 6px 10px;
-      font-weight: bold;
+      font-weight: 700;
       font-size: 0.85rem;
-      text-transform: uppercase;
+      border-bottom: 3px solid var(--ral-1026);
+      letter-spacing: 0.3px;
     }
 
-    /* Einzel-Countdown Tabellen-Layout */
+    /* Interaktive Messwert-Tabellen */
     .interactive-table {
       width: 100%;
       border-collapse: collapse;
@@ -201,44 +243,67 @@
     }
 
     .interactive-table td {
-      padding: 6px 8px;
+      padding: 6px 10px;
       font-size: 0.85rem;
       vertical-align: middle;
     }
 
     .param-label {
-      font-weight: bold;
-      width: 30%;
-      color: var(--text-color);
+      font-weight: 600;
+      width: 32%;
+      color: var(--gray-dark);
+      font-size: 0.82rem;
+    }
+
+    /* Spezifisches Styling für das x-ABCDE-Schema */
+    .abcde-key {
+      display: inline-block;
+      width: 28px;
+      height: 24px;
+      line-height: 22px;
+      text-align: center;
+      background: var(--ral-5002);
+      color: var(--ral-1026);
+      font-weight: 900;
+      font-size: 0.95rem;
+      border-radius: 4px;
+      margin-right: 6px;
+      border: 1px solid var(--ral-5002);
     }
 
     .param-action {
-      width: 100px;
+      width: 90px;
       text-align: center;
     }
 
     .param-value {
       width: auto;
       font-weight: 600;
+      color: #000;
     }
 
     .hidden-val {
       filter: blur(5px);
       user-select: none;
-      opacity: 0.3;
+      opacity: 0.25;
     }
 
+    /* Einsatz-Buttons in RAL 3024 Tagesleuchtrot */
     .btn-start {
       background-color: var(--ral-3024);
       color: #FFFFFF;
-      border: 1px solid #000;
-      padding: 4px 10px;
-      font-size: 0.75rem;
-      font-weight: bold;
+      border: 1px solid #900;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
       border-radius: 3px;
       cursor: pointer;
-      text-transform: uppercase;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      transition: background 0.2s;
+    }
+
+    .btn-start:hover {
+      background-color: #d62300;
     }
 
     .btn-start:disabled {
@@ -249,22 +314,10 @@
     }
 
     .timer-text {
-      font-weight: bold;
-      color: var(--ral-5002);
+      font-weight: 700;
+      color: var(--ral-3024);
       font-size: 0.85rem;
-    }
-
-    .alert-banner {
-      background: var(--ral-1026);
-      color: #000;
-      padding: 8px;
-      font-size: 0.85rem;
-      text-align: center;
-      font-weight: bold;
-      border-bottom: 2px solid var(--ral-3024);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      font-family: monospace;
     }
   </style>
 </head>
@@ -272,11 +325,11 @@
 
 <div class="container">
   <header>
-    <h1>Rettungsdienst MANV Sichtungsschema</h1>
+    <h1>Einsatzprotokoll - MANV Sichtung</h1>
   </header>
 
   <div id="global-alert" class="alert-banner" style="display:none;">
-    ⚠️ Es läuft bereits eine Untersuchung! Bitte warten Sie den aktuellen Countdown ab.
+    ⚠️ Untersuchung läuft! Bitte warten Sie den aktuellen Countdown ab.
   </div>
 
   <!-- Ersteinschätzung -->
@@ -289,27 +342,27 @@
     <div class="info-box" style="margin-top:6px;">
       <label>Ersteindruck</label><span id="pat-impression">-</span>
     </div>
-    <div class="info-box" style="margin-top:6px; border-left: 4px solid var(--ral-3024);">
-      <label>Offensichtliche Verletzungen / Erkrankungen</label>
+    <div class="info-box alert-box" style="margin-top:6px;">
+      <label style="color: var(--ral-3024);">Offensichtliche Verletzungen / Erkrankungen</label>
       <span id="pat-visible-injuries" style="font-weight: bold; color: var(--ral-3024);">-</span>
     </div>
   </div>
 
   <!-- Schema Mensch -->
   <div class="body-schema-section">
-    <div class="section-title">Lokalisation / Verletzungsmuster</div>
+    <div class="section-title">Verletzungsmuster / Körperstatus</div>
     <div class="body-container">
       <div>
         <div class="body-label">Vorderseite</div>
         <div class="body-view" id="front-view">
           <svg class="body-svg" viewBox="0 0 100 200">
-            <circle cx="50" cy="20" r="12"/>
-            <rect x="42" y="32" width="16" height="8"/>
-            <rect x="30" y="40" width="40" height="60" rx="5"/>
-            <rect x="18" y="40" width="10" height="65" rx="3"/>
-            <rect x="72" y="40" width="10" height="65" rx="3"/>
-            <rect x="34" y="102" width="13" height="80" rx="3"/>
-            <rect x="53" y="102" width="13" height="80" rx="3"/>
+            <circle cx="50" cy="18" r="11"/>
+            <rect x="44" y="29" width="12" height="6" rx="1"/>
+            <rect x="28" y="35" width="44" height="60" rx="4"/>
+            <rect x="15" y="35" width="11" height="65" rx="3"/>
+            <rect x="74" y="35" width="11" height="65" rx="3"/>
+            <rect x="32" y="97" width="15" height="85" rx="3"/>
+            <rect x="53" y="97" width="15" height="85" rx="3"/>
           </svg>
         </div>
       </div>
@@ -317,13 +370,13 @@
         <div class="body-label">Rückseite</div>
         <div class="body-view" id="back-view">
           <svg class="body-svg" viewBox="0 0 100 200">
-            <circle cx="50" cy="20" r="12"/>
-            <rect x="42" y="32" width="16" height="8"/>
-            <rect x="30" y="40" width="40" height="60" rx="5"/>
-            <rect x="18" y="40" width="10" height="65" rx="3"/>
-            <rect x="72" y="40" width="10" height="65" rx="3"/>
-            <rect x="34" y="102" width="13" height="80" rx="3"/>
-            <rect x="53" y="102" width="13" height="80" rx="3"/>
+            <circle cx="50" cy="18" r="11"/>
+            <rect x="44" y="29" width="12" height="6" rx="1"/>
+            <rect x="28" y="35" width="44" height="60" rx="4"/>
+            <rect x="15" y="35" width="11" height="65" rx="3"/>
+            <rect x="74" y="35" width="11" height="65" rx="3"/>
+            <rect x="32" y="97" width="15" height="85" rx="3"/>
+            <rect x="53" y="97" width="15" height="85" rx="3"/>
           </svg>
         </div>
       </div>
@@ -332,7 +385,7 @@
 
   <!-- Detail-Spalten -->
   <div class="detail-grid">
-    <!-- Linke Spalte: Befunde -->
+    <!-- Linke Spalte: x-ABCDE & SAMPLER -->
     <div class="column">
       
       <!-- x-ABCDE -->
@@ -353,14 +406,25 @@
 
     </div>
 
-    <!-- Rechte Spalte: Messwerte -->
+    <!-- Rechte Spalte: Vitalparameter & Klinische Scores -->
     <div class="column">
+      
+      <!-- Vitalparameter -->
       <div class="card">
         <div class="card-header">Vitalparameter / Messwerte</div>
         <table class="interactive-table">
           <tbody id="table-vitals"></tbody>
         </table>
       </div>
+
+      <!-- Klinische Scores & Assessment-Tools -->
+      <div class="card">
+        <div class="card-header">Klinische Scores & Assessment-Tools</div>
+        <table class="interactive-table">
+          <tbody id="table-scores"></tbody>
+        </table>
+      </div>
+
     </div>
 
   </div>
@@ -394,6 +458,7 @@
         markers: [],
         abcde: [],
         sampler: [],
+        scores: [],
         vitals: []
       };
 
@@ -405,12 +470,12 @@
           { view: "front", top: "75%", left: "60%", text: "Fehlstellung" }
         ];
         pat.abcde = [
-          { key: "eXsanguination", val: "Kritische Blutung A. femoralis rechts" },
-          { key: "Airway", val: "Atemwege frei" },
-          { key: "Breathing", val: "AF 32/min, zyanotisch, feuchte Nebengeräusche" },
-          { key: "Circulation", val: "Puls radialis nicht tastbar, Karotis schwach" },
-          { key: "Disability", val: "GCS 9 (V3, M4, O2), Pupillen träge" },
-          { key: "Exposure", val: "Hypothermie, Schürfwunden Rumpf" }
+          { letter: "x", label: "eXsanguination", val: "Kritische Blutung A. femoralis rechts" },
+          { letter: "A", label: "Airway", val: "Atemwege frei" },
+          { letter: "B", label: "Breathing", val: "AF 32/min, zyanotisch, feuchte Nebengeräusche" },
+          { letter: "C", label: "Circulation", val: "Puls radialis nicht tastbar, Karotis schwach" },
+          { letter: "D", label: "Disability", val: "GCS 9 (V3, M4, O2), Pupillen träge" },
+          { letter: "E", label: "Exposure", val: "Hypothermie, Schürfwunden Rumpf" }
         ];
         pat.sampler = [
           { key: "Symptome", val: "Starke Schmerzen, Dyspnoe" },
@@ -421,7 +486,16 @@
           { key: "Ereignis", val: "Vom LKW erfasst" },
           { key: "Risikofaktoren", val: "Hämorrhagischer Schock" }
         ];
-        // Schock -> RR < 100 mmHg -> ReKap > 2 Sek
+        pat.scores = [
+          { key: "GCS", val: "9 Punkte (E2, V3, M4) - Mittelschweres SHT" },
+          { key: "BE-FAST", val: "Auffällig (Motorische Reaktion / Armschwäche)" },
+          { key: "NEWS2-Score", val: "11 Punkte (Hohes Risiko für klinische Verschlechterung)" },
+          { key: "NEXUS-Kriterien", val: "Positiv (Schmerzhafte Ablenkungsverletzung, GCS < 15)" },
+          { key: "qSOFA-Score", val: "2 Punkte (AF >= 22, GCS < 15) - Sepsis-Risiko hoch" },
+          { key: "sPESI-Score", val: "2 Punkte (Puls >= 110, SpO2 < 90%) - Hohes Risiko" },
+          { key: "Wells-Score", val: "1.5 Punkte (Tachykardie > 100/min) - Mäßiges Risiko" },
+          { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
+        ];
         pat.vitals = [
           { key: "ReKap-Zeit", val: "> 2 Sek (verzögert)" },
           { key: "Puls", val: "145 bpm (fadenförmig)" },
@@ -436,16 +510,16 @@
         pat.impression = "Wach, ansprechbar, starke Schmerzen, hält Arm fest.";
         pat.visibleInjuries = "Fehlstellung Unterarm li., Ruß um Mund und Nase, Schnittwunde Kopf.";
         pat.markers = [
-          { view: "front", top: "15%", left: "45%", text: "Platzwunde" },
-          { view: "front", top: "45%", left: "15%", text: "Unterarmfraktur" }
+          { view: "front", top: "12%", left: "30%", text: "Platzwunde" },
+          { view: "front", top: "45%", left: "10%", text: "Unterarmfraktur" }
         ];
         pat.abcde = [
-          { key: "eXsanguination", val: "Keine kritische Blutung" },
-          { key: "Airway", val: "Atemwege frei, Rußspuren oral" },
-          { key: "Breathing", val: "AF 20/min, Vesikuläratmen bds." },
-          { key: "Circulation", val: "Puls kräftig, regelmäßig" },
-          { key: "Disability", val: "GCS 15, Pupillen isokor" },
-          { key: "Exposure", val: "Geschlossene Fraktur Li. Unterarm" }
+          { letter: "x", label: "eXsanguination", val: "Keine kritische Blutung" },
+          { letter: "A", label: "Airway", val: "Atemwege frei, Rußspuren oral" },
+          { letter: "B", label: "Breathing", val: "AF 20/min, Vesikuläratmen bds." },
+          { letter: "C", label: "Circulation", val: "Puls kräftig, regelmäßig" },
+          { letter: "D", label: "Disability", val: "GCS 15, Pupillen isokor" },
+          { letter: "E", label: "Exposure", val: "Geschlossene Fraktur Li. Unterarm" }
         ];
         pat.sampler = [
           { key: "Symptome", val: "Schmerzen Arm (7/10)" },
@@ -456,7 +530,16 @@
           { key: "Ereignis", val: "Explosion im Gebäude" },
           { key: "Risikofaktoren", val: "Inhalationstrauma möglich" }
         ];
-        // Stabil -> RR >= 100 mmHg -> ReKap < 2 Sek
+        pat.scores = [
+          { key: "GCS", val: "15 Punkte (E4, V5, M6) - Unauffällig" },
+          { key: "BE-FAST", val: "Unauffällig" },
+          { key: "NEWS2-Score", val: "1 Punkt (Atemfrequenz leicht erhöht)" },
+          { key: "NEXUS-Kriterien", val: "Positiv (Schmerzhafte Ablenkungsverletzung Arm/Kopf)" },
+          { key: "qSOFA-Score", val: "0 Punkte - Niedriges Sepsis-Risiko" },
+          { key: "sPESI-Score", val: "0 Punkte - Niedriges Risiko" },
+          { key: "Wells-Score", val: "0 Punkte - Niedriges Risiko" },
+          { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
+        ];
         pat.vitals = [
           { key: "ReKap-Zeit", val: "< 2 Sek (normal)" },
           { key: "Puls", val: "92 bpm" },
@@ -471,16 +554,16 @@
         pat.impression = "Gehfähig, aufgeregt, leichtes Hinken.";
         pat.visibleInjuries = "Schürfwunden Knie li., Prellung Schulter re., blasse Haut.";
         pat.markers = [
-          { view: "front", top: "70%", left: "35%", text: "Schürfwunde" },
-          { view: "back", top: "25%", left: "65%", text: "Prellung Schulter" }
+          { view: "front", top: "68%", left: "25%", text: "Schürfwunde" },
+          { view: "back", top: "22%", left: "55%", text: "Prellung Schulter" }
         ];
         pat.abcde = [
-          { key: "eXsanguination", val: "Keine" },
-          { key: "Airway", val: "Frei" },
-          { key: "Breathing", val: "Unauffällig, unbeeinträchtigt" },
-          { key: "Circulation", val: "Puls gut tastbar" },
-          { key: "Disability", val: "GCS 15, voll orientiert" },
-          { key: "Exposure", val: "Oberflächliche Schürfwunden" }
+          { letter: "x", label: "eXsanguination", val: "Keine" },
+          { letter: "A", label: "Airway", val: "Frei" },
+          { letter: "B", label: "Breathing", val: "Unauffällig, unbeeinträchtigt" },
+          { letter: "C", label: "Circulation", val: "Puls gut tastbar" },
+          { letter: "D", label: "Disability", val: "GCS 15, voll orientiert" },
+          { letter: "E", label: "Exposure", val: "Oberflächliche Schürfwunden" }
         ];
         pat.sampler = [
           { key: "Symptome", val: "Leichte Schmerzen Knie" },
@@ -490,6 +573,16 @@
           { key: "Letzte Mahlzeit", val: "Vor 4 Stunden" },
           { key: "Ereignis", val: "Sturz beim Flüchten" },
           { key: "Risikofaktoren", val: "Keine" }
+        ];
+        pat.scores = [
+          { key: "GCS", val: "15 Punkte (E4, V5, M6) - Unauffällig" },
+          { key: "BE-FAST", val: "Unauffällig" },
+          { key: "NEWS2-Score", val: "0 Punkte - Kein erhöhtes Risiko" },
+          { key: "NEXUS-Kriterien", val: "Negativ (Kein HWK-Immobilisationsbedarf)" },
+          { key: "qSOFA-Score", val: "0 Punkte - Unauffällig" },
+          { key: "sPESI-Score", val: "0 Punkte - Unauffällig" },
+          { key: "Wells-Score", val: "0 Punkte - Niedriges Risiko" },
+          { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
         ];
         pat.vitals = [
           { key: "ReKap-Zeit", val: "< 2 Sek (normal)" },
@@ -505,16 +598,16 @@
         pat.impression = "Reglos, keine Atembewegung erkennbar.";
         pat.visibleInjuries = "Schwere Schädel-Hirn-Zertrümmerung, Amputation Oberschenkel li.";
         pat.markers = [
-          { view: "front", top: "10%", left: "40%", text: "Offenes SHT" },
-          { view: "front", top: "65%", left: "30%", text: "Subtotale Amputation" }
+          { view: "front", top: "8%", left: "25%", text: "Offenes SHT" },
+          { view: "front", top: "60%", left: "20%", text: "Amputation" }
         ];
         pat.abcde = [
-          { key: "eXsanguination", val: "Keine Aktionen möglich" },
-          { key: "Airway", val: "Nicht frei / verlegt" },
-          { key: "Breathing", val: "Keine Spontanatmung (auch nach Esmarch)" },
-          { key: "Circulation", val: "Kein Puls (A. carotis 0)" },
-          { key: "Disability", val: "GCS 3, Pupillen weit & lichtstarr" },
-          { key: "Exposure", val: "Tödliche Verletzungen" }
+          { letter: "x", label: "eXsanguination", val: "Keine Aktionen möglich" },
+          { letter: "A", label: "Airway", val: "Nicht frei / verlegt" },
+          { letter: "B", label: "Breathing", val: "Keine Spontanatmung (auch nach Esmarch)" },
+          { letter: "C", label: "Circulation", val: "Kein Puls (A. carotis 0)" },
+          { letter: "D", label: "Disability", val: "GCS 3, Pupillen weit & lichtstarr" },
+          { letter: "E", label: "Exposure", val: "Tödliche Verletzungen" }
         ];
         pat.sampler = [
           { key: "Symptome", val: "Keine Angaben möglich" },
@@ -524,6 +617,16 @@
           { key: "Letzte Mahlzeit", val: "Unbekannt" },
           { key: "Ereignis", val: "Von Trümmerteilen getroffen" },
           { key: "Risikofaktoren", val: "-" }
+        ];
+        pat.scores = [
+          { key: "GCS", val: "3 Punkte (E1, V1, M1) - Tiefe Bewusstlosigkeit / Tod" },
+          { key: "BE-FAST", val: "Nicht beurteilbar" },
+          { key: "NEWS2-Score", val: "Maximaler Score / Reanimationsfrei" },
+          { key: "NEXUS-Kriterien", val: "Nicht indiziert" },
+          { key: "qSOFA-Score", val: "3 Punkte" },
+          { key: "sPESI-Score", val: "Nicht indiziert" },
+          { key: "Wells-Score", val: "Nicht indiziert" },
+          { key: "APGAR-Schema", val: "Nicht anwendbar" }
         ];
         pat.vitals = [
           { key: "ReKap-Zeit", val: "> 2 Sek (keine Perfusion)" },
@@ -539,16 +642,16 @@
         pat.impression = "Schnappatmung, hochroter Kopf, starkes Schwitzen, Verbrennungen 3. Grades 80% KOF.";
         pat.visibleInjuries = "Grad III Verbrennungen Rumpf & Beine, Brandwunden Gesicht.";
         pat.markers = [
-          { view: "front", top: "35%", left: "35%", text: "Verbrennung 3°" },
-          { view: "back", top: "35%", left: "35%", text: "Verbrennung 3°" }
+          { view: "front", top: "30%", left: "25%", text: "Verbrennung 3°" },
+          { view: "back", top: "30%", left: "25%", text: "Verbrennung 3°" }
         ];
         pat.abcde = [
-          { key: "eXsanguination", val: "Keine spritzenden Blutungen" },
-          { key: "Airway", val: "Inhalationstrauma schwerst, Ödem" },
-          { key: "Breathing", val: "Schnappatmung AF 4/min" },
-          { key: "Circulation", val: "Puls zentral kaum tastbar, fadenförmig" },
-          { key: "Disability", val: "GCS 4" },
-          { key: "Exposure", val: "Verbrennung >80% KOF" }
+          { letter: "x", label: "eXsanguination", val: "Keine spritzenden Blutungen" },
+          { letter: "A", label: "Airway", val: "Inhalationstrauma schwerst, Ödem" },
+          { letter: "B", label: "Breathing", val: "Schnappatmung AF 4/min" },
+          { letter: "C", label: "Circulation", val: "Puls zentral kaum tastbar, fadenförmig" },
+          { letter: "D", label: "Disability", val: "GCS 4" },
+          { letter: "E", label: "Exposure", val: "Verbrennung >80% KOF" }
         ];
         pat.sampler = [
           { key: "Symptome", val: "Keine zielgerichtete Reaktion" },
@@ -558,6 +661,16 @@
           { key: "Letzte Mahlzeit", val: "Unbekannt" },
           { key: "Ereignis", val: "Direkte Flammeneinwirkung" },
           { key: "Risikofaktoren", val: "Morbide Prognose" }
+        ];
+        pat.scores = [
+          { key: "GCS", val: "4 Punkte (E1, V1, M2) - Schwerstes SHT / Koma" },
+          { key: "BE-FAST", val: "Nicht beurteilbar (Keine Reaktion)" },
+          { key: "NEWS2-Score", val: "14 Punkte (Kritischer Zustand)" },
+          { key: "NEXUS-Kriterien", val: "Positiv (GCS < 15, schwere Verbrennungen)" },
+          { key: "qSOFA-Score", val: "3 Punkte (RR, AF, GCS stark verändert)" },
+          { key: "sPESI-Score", val: "3 Punkte - Höchstes Risiko" },
+          { key: "Wells-Score", val: "3.0 Punkte (Tachypnoe/Instabilität)" },
+          { key: "APGAR-Schema", val: "Nicht anwendbar (Kein Neugeborenes)" }
         ];
         pat.vitals = [
           { key: "ReKap-Zeit", val: "> 2 Sek (verzögert)" },
@@ -593,10 +706,15 @@
       const rowId = `${prefix}-${index}`;
       const tr = document.createElement('tr');
 
+      let labelContent = item.key;
+      if (prefix === 'abcde') {
+        labelContent = `<span class="abcde-key">${item.letter}</span>${item.label}`;
+      }
+
       tr.innerHTML = `
-        <td class="param-label">${item.key}</td>
+        <td class="param-label">${labelContent}</td>
         <td class="param-action">
-          <button class="btn-start" id="btn-${rowId}" onclick="runSingleCountdown('${rowId}')">Start</button>
+          <button class="btn-start" id="btn-${rowId}" onclick="runSingleCountdown('${rowId}')">Messen</button>
           <span class="timer-text" id="timer-${rowId}" style="display:none;">10s</span>
         </td>
         <td class="param-value">
@@ -634,6 +752,7 @@
     renderTableSection('table-abcde', p.abcde, 'abcde');
     renderTableSection('table-sampler', p.sampler, 'sampler');
     renderTableSection('table-vitals', p.vitals, 'vitals');
+    renderTableSection('table-scores', p.scores, 'scores');
   }
 
   function runSingleCountdown(rowId) {
