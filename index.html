@@ -191,7 +191,7 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.4);
     }
 
-    /* Detail-Raster (Zwei-Spalten Dashboard) */
+    /* Detail-Raster (Zwei-Spalten Dashboard mit Zeilen-Alignment) */
     .detail-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -204,18 +204,15 @@
       .detail-grid { grid-template-columns: 1fr; }
     }
 
-    .column {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
     .card {
       border: 2px solid var(--ral-5002);
       border-radius: 4px;
       background: #FFFFFF;
       overflow: hidden;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 12px;
     }
 
     .card-header {
@@ -236,6 +233,11 @@
 
     .interactive-table tr {
       border-bottom: 1px solid var(--gray-medium);
+      height: 38px; /* Einheits-Höhe für alle Tabellenzeilen für exaktes Alignment */
+    }
+
+    .interactive-table tr:last-child {
+      border-bottom: none;
     }
 
     .interactive-table tr:nth-child(even) {
@@ -386,11 +388,10 @@
     </div>
   </div>
 
-  <!-- Detail-Spalten -->
+  <!-- Detail-Spalten (Horizontale Synchronisation) -->
   <div class="detail-grid">
-    <!-- Linke Spalte: x-ABCDE & SAMPLER -->
-    <div class="column">
-      
+    <!-- Linke Spalte -->
+    <div>
       <!-- x-ABCDE -->
       <div class="card">
         <div class="card-header">x-ABCDE Schema</div>
@@ -399,19 +400,17 @@
         </table>
       </div>
 
-      <!-- SAMPLER -->
+      <!-- SAMPLER (Parallel zu Scores) -->
       <div class="card">
         <div class="card-header">SAMPLER Anamnese</div>
         <table class="interactive-table">
           <tbody id="table-sampler"></tbody>
         </table>
       </div>
-
     </div>
 
-    <!-- Rechte Spalte: Vitalparameter & Klinische Scores -->
-    <div class="column">
-      
+    <!-- Rechte Spalte -->
+    <div>
       <!-- Vitalparameter -->
       <div class="card">
         <div class="card-header">Vitalparameter / Messwerte</div>
@@ -420,16 +419,14 @@
         </table>
       </div>
 
-      <!-- Klinische Scores & Assessment-Tools -->
+      <!-- Klinische Scores & Assessment-Tools (Parallel zu SAMPLER) -->
       <div class="card">
         <div class="card-header">Klinische Scores & Assessment-Tools</div>
         <table class="interactive-table">
           <tbody id="table-scores"></tbody>
         </table>
       </div>
-
     </div>
-
   </div>
 </div>
 
@@ -707,32 +704,44 @@
     return id;
   }
 
-  function renderTableSection(containerId, dataArray, prefix) {
+  function renderTableSection(containerId, dataArray, prefix, targetRowCount) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
 
-    dataArray.forEach((item, index) => {
+    const totalRows = targetRowCount || dataArray.length;
+
+    for (let index = 0; index < totalRows; index++) {
+      const item = dataArray[index];
       const rowId = `${prefix}-${index}`;
       const tr = document.createElement('tr');
 
-      let labelContent = item.key;
-      if (prefix === 'abcde') {
-        labelContent = `<span class="abcde-key">${item.letter}</span>${item.label}`;
-      }
+      if (item) {
+        let labelContent = item.key;
+        if (prefix === 'abcde') {
+          labelContent = `<span class="abcde-key">${item.letter}</span>${item.label}`;
+        }
 
-      tr.innerHTML = `
-        <td class="param-label">${labelContent}</td>
-        <td class="param-action">
-          <button class="btn-start" id="btn-${rowId}" onclick="runSingleCountdown('${rowId}')">Start</button>
-          <span class="timer-text" id="timer-${rowId}" style="display:none;">10s</span>
-        </td>
-        <td class="param-value">
-          <span id="val-${rowId}" class="hidden-val">---</span>
-          <span id="real-val-${rowId}" style="display:none;">${item.val}</span>
-        </td>
-      `;
+        tr.innerHTML = `
+          <td class="param-label">${labelContent}</td>
+          <td class="param-action">
+            <button class="btn-start" id="btn-${rowId}" onclick="runSingleCountdown('${rowId}')">Start</button>
+            <span class="timer-text" id="timer-${rowId}" style="display:none;">10s</span>
+          </td>
+          <td class="param-value">
+            <span id="val-${rowId}" class="hidden-val">---</span>
+            <span id="real-val-${rowId}" style="display:none;">${item.val}</span>
+          </td>
+        `;
+      } else {
+        // Leere Zeile ohne Inhalt, Beschriftung oder Button
+        tr.innerHTML = `
+          <td class="param-label">&nbsp;</td>
+          <td class="param-action">&nbsp;</td>
+          <td class="param-value">&nbsp;</td>
+        `;
+      }
       container.appendChild(tr);
-    });
+    }
   }
 
   function loadPatientData() {
@@ -758,11 +767,11 @@
       container.appendChild(markerEl);
     });
 
-    // Tabellen rendern
-    renderTableSection('table-abcde', p.abcde, 'abcde');
-    renderTableSection('table-sampler', p.sampler, 'sampler');
-    renderTableSection('table-vitals', p.vitals, 'vitals');
-    renderTableSection('table-scores', p.scores, 'scores');
+    // Tabellen rendern und Zeilenhöhe angleichen (8 Zeilen pro Block)
+    renderTableSection('table-abcde', p.abcde, 'abcde', 8);
+    renderTableSection('table-vitals', p.vitals, 'vitals', 8);
+    renderTableSection('table-sampler', p.sampler, 'sampler', 8);
+    renderTableSection('table-scores', p.scores, 'scores', 8);
   }
 
   function runSingleCountdown(rowId) {
