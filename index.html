@@ -433,6 +433,21 @@
 <script>
   let isTimerRunning = false;
 
+  // Pool für medizinische und lebensstilbedingte Risikofaktoren
+  const riskFactorPool = [
+    "Keine bekannt",
+    "Adipositas Permagna (BMI > 35)",
+    "Nikotinabusus (30 Pack Years)",
+    "Chronischer Alkoholabusus",
+    "Medikamentenabhängigkeit (Benzodiazepine)",
+    "Starker C2-Abusus",
+    "Mangelernährung / Kachexie",
+    "Adipositas Grad I",
+    "C2- und Nikotinabusus",
+    "Drogenabusus (Polytoxikomanie)",
+    "Keine wesentlichen Risikofaktoren"
+  ];
+
   // 100 Patienten Generator
   function generatePatients() {
     const names = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann"];
@@ -447,6 +462,7 @@
       const ln = names[i % names.length];
       const age = 15 + (i * 7) % 65;
       const gender = isFemale ? "weiblich" : "männlich";
+      const riskFactor = riskFactorPool[i % riskFactorPool.length];
 
       let type = i % 5; 
       let pat = {
@@ -486,7 +502,7 @@
           { key: "Patientengesch.", val: "Keine Vorerkrankungen bekannt" },
           { key: "Letzte Mahlzeit", val: "Vor 3 Stunden" },
           { key: "Ereignis", val: "Vom LKW erfasst" },
-          { key: "Risikofaktoren", val: "Blutverlust" }
+          { key: "Risikofaktoren", val: riskFactor }
         ];
         pat.scores = [
           { key: "GCS", val: "9 Punkte (E2, V3, M4)" },
@@ -531,7 +547,7 @@
           { key: "Patientengesch.", val: "Bluthochdruck" },
           { key: "Letzte Mahlzeit", val: "Vor 1 Stunde" },
           { key: "Ereignis", val: "Explosion im Gebäude" },
-          { key: "Risikofaktoren", val: "Rauchgas ausgesetzt" }
+          { key: "Risikofaktoren", val: riskFactor }
         ];
         pat.scores = [
           { key: "GCS", val: "15 Punkte (E4, V5, M6)" },
@@ -576,7 +592,7 @@
           { key: "Patientengesch.", val: "Keine" },
           { key: "Letzte Mahlzeit", val: "Vor 4 Stunden" },
           { key: "Ereignis", val: "Sturz beim Flüchten" },
-          { key: "Risikofaktoren", val: "Keine" }
+          { key: "Risikofaktoren", val: riskFactor }
         ];
         pat.scores = [
           { key: "GCS", val: "15 Punkte (E4, V5, M6)" },
@@ -621,7 +637,7 @@
           { key: "Patientengesch.", val: "Unbekannt" },
           { key: "Letzte Mahlzeit", val: "Unbekannt" },
           { key: "Ereignis", val: "Von Trümmerteilen getroffen" },
-          { key: "Risikofaktoren", val: "-" }
+          { key: "Risikofaktoren", val: "Unbekannt" }
         ];
         pat.scores = [
           { key: "GCS", val: "3 Punkte (E1, V1, M1)" },
@@ -666,7 +682,7 @@
           { key: "Patientengesch.", val: "Unbekannt" },
           { key: "Letzte Mahlzeit", val: "Unbekannt" },
           { key: "Ereignis", val: "Direkte Flammeneinwirkung" },
-          { key: "Risikofaktoren", val: "-" }
+          { key: "Risikofaktoren", val: riskFactor }
         ];
         pat.scores = [
           { key: "GCS", val: "4 Punkte (E1, V1, M2)" },
