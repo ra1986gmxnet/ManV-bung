@@ -593,11 +593,16 @@
     let p = "Puls: 80 bpm", rr = "RR: 120/80 mmHg", af = "AF: 16 / min", spo2 = "SpO2: 98 %", rekap = "ReKap: < 2 sek (vital stabil)";
     let bz = "BZ: 95 mg/dl", temp = "Temp: 36.6 °C", etco2 = "etCO2: 38 mmHg", co = "CO: < 2 %", spmet = "SpMet: < 1.5 %";
     let gcsE = 4, gcsV = 5, gcsM = 6, newsVal = 0, qsofaVal = 0, x = "Keine";
-    let befast = "BE-FAST: Unauffällig (0 Pkt - Keine Anzeichen für Schlaganfall / Hirndruck)", 
-        nexus = "NEXUS: Unauffällig (0 Pkt - Kein HWS-Schmerz, keine neurologischen Ausfälle, uneingeschränkt wach)", 
-        wells = "Wells-Score: Unauffällig (< 2 Pkt - Geringes Risiko für tiefe Venenthrombose / Lungenembolie)", 
-        spesi = "sPESI: Niedriges Risiko (0 Pkt - Keine kardiorespiratorische Dekompensation zu erwarten)", 
-        apgar = isUnderTwo ? "APGAR-Schema: 9 Punkte (Normal - Atmung, Herzschlag und Hautfarbe altersgerecht stabil)" : "APGAR-Schema: N/A (Nicht anwendbar - Patient ist kein Neugeborenes)";
+    let isUnconsciousPat = (category === "ROT" || category === "SCHWARZ" || category === "BLAU");
+
+    let befast = isUnconsciousPat ? 
+      "BE-FAST Schema: Nicht beurteilbar (Patient bewusstlos / nicht kooperabel)" : 
+      "BE-FAST: Unauffällig (0 Pkt - Keine Anzeichen für Schlaganfall / Hirndruck)";
+
+    let nexus = "NEXUS: Unauffällig (0 Pkt - Kein HWS-Schmerz, keine neurologischen Ausfälle, uneingeschränkt wach)"; 
+    let wells = "Wells-Score: Unauffällig (< 2 Pkt - Geringes Risiko für tiefe Venenthrombose / Lungenembolie)"; 
+    let spesi = "sPESI: Niedriges Risiko (0 Pkt - Keine kardiorespiratorische Dekompensation zu erwarten)"; 
+    let apgar = isUnderTwo ? "APGAR-Schema: 9 Punkte (Normal - Atmung, Herzschlag und Hautfarbe altersgerecht stabil)" : "APGAR-Schema: N/A (Nicht anwendbar - Patient ist kein Neugeborenes)";
 
     if (category === "GRÜN") {
       walking = (ageInYears < 2.0) ? "Nein" : "Ja";
