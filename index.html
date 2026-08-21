@@ -1,272 +1,1099 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ManV-Übung - Patienten-Triage & QR-Codes</title>
-    <!-- Tailwind CSS für modernes Design -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- QRCode.js für die QR-Code-Generierung -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            .page-break { page-break-after: always; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MANV Sichtungsübung - Rettungsdienst Protokoll</title>
+  <style>
+    :root {
+      --ral-3024: #FF2A00;
+      --ral-1026: #D2E100;
+      --ral-5002: #00209F;
+      --bg-color: #0b1325;
+      --card-bg: #FFFFFF;
+      --text-color: #1e293b;
+      --border-color: #1a237e;
+      --gray-light: #f8fafc;
+      --gray-medium: #cbd5e1;
+      --gray-dark: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 12px;
+      line-height: 1.3;
+    }
+
+    #security-blocker {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #FFFFFF;
+      z-index: 99999;
+      display: none;
+    }
+
+    .admin-login-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(11, 19, 37, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99998;
+    }
+
+    .login-card {
+      background: #FFFFFF;
+      padding: 30px;
+      border-radius: 8px;
+      border: 4px solid var(--ral-5002);
+      width: 350px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+      text-align: center;
+    }
+
+    .login-card h2 {
+      color: var(--ral-5002);
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid var(--gray-medium);
+      border-radius: 4px;
+      font-size: 0.95rem;
+    }
+
+    .login-btn {
+      width: 100%;
+      background: var(--ral-5002);
+      color: #FFFFFF;
+      border: none;
+      padding: 10px;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .login-btn:hover { background: #001570; }
+    .login-error { color: var(--ral-3024); font-size: 0.8rem; margin-top: 10px; display: none; }
+
+    .admin-dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #eef2f6;
+      border: 4px solid var(--ral-5002);
+      border-radius: 8px;
+      padding: 20px;
+      display: none;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--ral-5002);
+      color: #FFF;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border-bottom: 4px solid var(--ral-3024);
+    }
+
+    .admin-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-ctrl {
+      padding: 8px 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-start-ex { background: var(--ral-1026); color: #000; }
+    .btn-stop-ex { background: var(--ral-3024); color: #fff; }
+    .btn-logout { background: #64748B; color: #fff; }
+
+    .admin-stats-box {
+      background: #fff;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border: 1px solid var(--gray-medium);
+    }
+
+    .admin-stats-box h3 { font-size: 0.95rem; color: var(--ral-5002); margin-bottom: 10px; }
+    
+    .badge-rot { background: var(--ral-3024) !important; color: #ffffff !important; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+    .badge-gelb { background: var(--ral-1026) !important; color: #000000 !important; font-weight: 800; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+    .badge-gruen { background: #22c55e !important; color: #ffffff !important; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+    .badge-blau { background: var(--ral-5002) !important; color: #ffffff !important; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+    .badge-schwarz { background: #000000 !important; color: #ffffff !important; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+
+    .gesichtet-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 5px;
+      background: var(--gray-light);
+      border: 1px solid var(--gray-medium);
+      border-radius: 4px;
+    }
+
+    .gesichtet-detail-card {
+      background: #ffffff;
+      border: 2px solid var(--ral-5002);
+      border-radius: 6px;
+      padding: 10px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .gesichtet-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--gray-medium);
+      padding-bottom: 5px;
+    }
+
+    .gesichtet-card-body {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 5px;
+      font-size: 0.8rem;
+      color: var(--gray-dark);
+    }
+
+    .patient-table-admin {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    .patient-table-admin th, .patient-table-admin td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--gray-medium);
+      text-align: left;
+    }
+
+    .patient-table-admin th {
+      background: var(--ral-5002);
+      color: #fff;
+      font-size: 0.8rem;
+    }
+
+    .sk-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .sk-btn {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      border: 2px solid #333;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .sk-btn.rot { background: var(--ral-3024); }
+    .sk-btn.gelb { background: var(--ral-1026); }
+    .sk-btn.gruen { background: #22c55e; }
+    .sk-btn.blau { background: var(--ral-5002); }
+    .sk-btn.schwarz { background: #000; }
+    .sk-btn.selected { transform: scale(1.2); box-shadow: 0 0 5px rgba(0,0,0,0.8); border: 2px solid #fff; }
+
+    .user-form-grid {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .user-form-grid input, .user-form-grid select {
+      padding: 8px;
+      border: 1px solid var(--gray-medium);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      flex: 1;
+      min-width: 150px;
+    }
+    .btn-add-user {
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      padding: 8px 15px;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-add-user:hover { background: #16a34a; }
+    .btn-del-user {
+      background: var(--ral-3024);
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #eef2f6;
+      border: 4px solid var(--ral-5002);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 25px rgba(0,0,0,0.6);
+      display: none;
+    }
+
+    header {
+      background-color: var(--ral-5002);
+      color: #FFFFFF;
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 5px solid var(--ral-3024);
+      position: relative;
+    }
+
+    header h1 { font-size: 1.25rem; font-weight: 800; color: #ffffff; }
+
+    header::after {
+      content: ''; display: block; height: 4px; background: var(--ral-1026); width: 100%; position: absolute; bottom: -9px; left: 0;
+    }
+
+    .alert-banner {
+      background: var(--ral-1026); color: #000000; padding: 8px 12px; font-size: 0.85rem; text-align: center; font-weight: 700; border-bottom: 3px solid var(--ral-3024); position: sticky; top: 0; z-index: 100;
+    }
+
+    .section-title {
+      background: var(--ral-5002); color: #FFFFFF; padding: 6px 12px; font-weight: 700; font-size: 0.85rem; border-left: 6px solid var(--ral-1026); margin-bottom: 8px; border-radius: 2px; display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .patient-header { padding: 12px; border-bottom: 3px solid var(--ral-5002); background: #FFFFFF; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .info-box { background: var(--gray-light); padding: 8px 12px; border-radius: 4px; border: 1px solid var(--gray-medium); border-left: 4px solid var(--ral-5002); display: flex; justify-content: space-between; align-items: center; }
+    .info-box-content { flex-grow: 1; }
+    .info-box label { font-weight: 700; display: block; font-size: 0.72rem; color: var(--gray-dark); margin-bottom: 2px; }
+    .info-box span { font-size: 0.95rem; font-weight: 600; }
+    .alert-box { border-left: 4px solid var(--ral-3024) !important; background: #fff5f5; }
+
+    .body-schema-section { padding: 12px; border-bottom: 3px solid var(--ral-5002); background: #FFFFFF; text-align: center; }
+    .body-container { display: flex; justify-content: center; gap: 40px; margin-top: 10px; flex-wrap: wrap; }
+    .body-view { position: relative; width: 120px; height: 250px; border: 2px solid var(--ral-5002); background: #f8fafc; border-radius: 6px; padding: 5px; }
+    .body-label { font-weight: 700; font-size: 0.8rem; margin-bottom: 6px; color: var(--ral-5002); }
+    .body-svg { width: 100%; height: 100%; fill: #cbd5e1; stroke: var(--ral-5002); stroke-width: 1.5; }
+    .injury-marker { position: absolute; background: var(--ral-3024); color: #FFFFFF; font-size: 0.58rem; font-weight: 700; padding: 2px 5px; border-radius: 3px; border: 1px solid #000; white-space: nowrap; z-index: 10; display: none; transform: translate(-50%, -50%); }
+
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; background: #eef2f6; }
+    @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
+    .card { border: 2px solid var(--ral-5002); border-radius: 4px; background: #FFFFFF; overflow: hidden; display: flex; flex-direction: column; margin-bottom: 12px; }
+    .card-header { background: var(--ral-5002); color: #FFFFFF; padding: 6px 10px; font-weight: 700; font-size: 0.85rem; border-bottom: 3px solid var(--ral-1026); }
+    .interactive-table { width: 100%; border-collapse: collapse; }
+    .interactive-table tr { border-bottom: 1px solid var(--gray-medium); }
+    .interactive-table tr:nth-child(even) { background-color: var(--gray-light); }
+    .interactive-table td { padding: 6px 10px; font-size: 0.85rem; vertical-align: middle; }
+    .param-label { font-weight: 600; width: 35%; color: var(--gray-dark); font-size: 0.80rem; }
+    .abcde-key { display: inline-block; width: 28px; height: 24px; line-height: 22px; text-align: center; background: var(--ral-5002); color: var(--ral-1026); font-weight: 900; font-size: 0.95rem; border-radius: 4px; margin-right: 6px; }
+    .param-action { width: 80px; text-align: center; }
+    .param-value { font-weight: 600; color: #000; font-size: 0.8rem; }
+    .hidden-val { filter: blur(5px); user-select: none; opacity: 0.25; }
+    .btn-start { background-color: var(--ral-3024); color: #FFFFFF; border: 1px solid #900; padding: 4px 8px; font-size: 0.72rem; font-weight: 700; border-radius: 3px; cursor: pointer; }
+    .btn-start:disabled { background-color: #94A3B8; cursor: not-allowed; }
+    .timer-text { font-weight: 700; color: var(--ral-3024); font-size: 0.85rem; font-family: monospace; }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
+<body>
 
-    <!-- Header (No Print) -->
-    <header class="bg-blue-900 text-white p-6 shadow-md no-print">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold">ManV-Übung: Triage-Trainer</h1>
-                <p class="text-sm text-blue-200 mt-1">Erweiterte Simulation mit realistischen Vitalwerten (inkl. CO, SpO2 & Hb)</p>
-            </div>
-            <div class="mt-4 md:mt-0 flex gap-3">
-                <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-medium transition">
-                    Ansicht drucken / PDF
-                </button>
-            </div>
+<div id="security-blocker"></div>
+
+<!-- Admin Login Overlay -->
+<div id="admin-login-overlay" class="admin-login-overlay" style="display:none;">
+  <div class="login-card">
+    <h2>Admin-Bereich Login</h2>
+    <input type="text" id="login-user" class="login-input" placeholder="Benutzername">
+    <input type="password" id="login-pass" class="login-input" placeholder="Passwort">
+    <button class="login-btn" onclick="checkAdminLogin()">Anmelden</button>
+    <div id="login-error" class="login-error">Ungültige Anmeldedaten!</div>
+  </div>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="admin-dashboard" class="admin-dashboard">
+  <div class="admin-header">
+    <h1>MANV Admin-Steuerung & Übersicht</h1>
+    <div class="admin-controls">
+      <button class="btn-ctrl btn-start-ex" onclick="startExercise()">Übung starten</button>
+      <button class="btn-ctrl btn-stop-ex" onclick="stopExercise()">Übung stoppen</button>
+      <button class="btn-ctrl btn-logout" onclick="adminLogout()">Abmelden</button>
+    </div>
+  </div>
+
+  <div id="user-management-section" class="admin-stats-box" style="display:none;">
+    <h3>Benutzerverwaltung (Nur Haupt-Admin)</h3>
+    <div class="user-form-grid">
+      <input type="text" id="new-username" placeholder="Benutzername">
+      <input type="password" id="new-password" placeholder="Passwort">
+      <select id="new-role">
+        <option value="user">Normaler Benutzer</option>
+        <option value="admin">Administrator</option>
+      </select>
+      <button class="btn-add-user" onclick="addNewUser()">Benutzer anlegen</button>
+    </div>
+    <table class="patient-table-admin">
+      <thead>
+        <tr>
+          <th>Benutzername</th>
+          <th>Rolle</th>
+          <th>Aktion</th>
+        </tr>
+      </thead>
+      <tbody id="admin-users-rows"></tbody>
+    </table>
+  </div>
+
+  <div class="admin-stats-box">
+    <h3>Gesichtete Patienten (nach ID sortiert mit Details & durchgehender Nummerierung):</h3>
+    <div id="gesichtet-container" class="gesichtet-list-container">
+      <span style="font-size:0.8rem; color:#64748B; padding:5px;">Noch keine Patienten gesichtet.</span>
+    </div>
+  </div>
+
+  <table class="patient-table-admin">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Alter / Geschlecht</th>
+        <th>Gehfähig</th>
+        <th>Ersteindruck</th>
+        <th>Verletzungen</th>
+        <th>Echte SK</th>
+        <th>Teilnehmer Sichtung (mStart)</th>
+      </tr>
+    </thead>
+    <tbody id="admin-patient-rows"></tbody>
+  </table>
+</div>
+
+<!-- Client App Container -->
+<div class="container" id="client-container">
+  <header>
+    <h1>MANV Sichtungsübung</h1>
+  </header>
+
+  <div id="global-alert" class="alert-banner" style="display:none;">
+    ⚠️ Untersuchung läuft! Bitte warten Sie den aktuellen Countdown ab.
+  </div>
+
+  <div class="patient-header">
+    <div class="section-title">Ersteinschätzung</div>
+    <div class="grid-2">
+      <div class="info-box">
+        <div class="info-box-content">
+          <label>Name, Vorname</label>
+          <span id="val-header-name" class="hidden-val">---</span>
+          <span id="real-val-header-name" style="display:none;"></span>
         </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto p-4 md:p-6">
-
-        <!-- Sektion 1: QR-Code Karten für Teilnehmer (Druckansicht) -->
-        <section class="mb-12">
-            <div class="flex justify-between items-center mb-4 no-print">
-                <h2 class="text-xl font-semibold text-gray-700">Patienten-Karten (100 QR-Codes für A4-Druck)</h2>
-                <span class="text-sm text-gray-500">Optimiert für den standardmäßigen A4-Druck</span>
-            </div>
-            
-            <div id="qr-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                <!-- Wird dynamisch per JavaScript gefüllt -->
-            </div>
-        </section>
-
-        <!-- Sektion 2: Instruktoren-Übersicht (Prüftabelle) -->
-        <section class="bg-white rounded-lg shadow p-6 no-print">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Instruktoren-Übersicht & Musterlösung</h2>
-            <p class="text-sm text-gray-600 mb-4">Übersicht der Verletzungsmuster, mSTART-Kategorien und physiologischen Vitalwerte (inklusive CO, SpO2 und Hämoglobin-Wert Hb).</p>
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-3 py-3 text-left font-medium text-gray-500">ID</th>
-                            <th class="px-3 py-3 text-left font-medium text-gray-500">Name / Alter</th>
-                            <th class="px-3 py-3 text-left font-medium text-gray-500">Kategorie</th>
-                            <th class="px-3 py-3 text-left font-medium text-gray-500">Verletzung / Befund</th>
-                            <th class="px-3 py-3 text-left font-medium text-gray-500">Vitalwerte (HF / SpO2 / CO / Hb / RR)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="instructor-table-body" class="divide-y divide-gray-200 bg-white">
-                        <!-- Wird dynamisch per JavaScript gefüllt -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Modal / Einzelansicht, wenn ein QR-Code aufgerufen wird -->
-    <div id="patient-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative overflow-hidden">
-            <div id="modal-category-banner" class="absolute top-0 left-0 right-0 h-3"></div>
-            <div class="flex justify-between items-start mb-4 mt-2">
-                <div>
-                    <span id="modal-id-badge" class="text-xs font-bold px-2 py-1 rounded bg-gray-200 text-gray-700">ID: -</span>
-                    <h3 id="modal-name" class="text-2xl font-bold text-gray-900 mt-1">-</h3>
-                </div>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
-            </div>
-
-            <div class="space-y-4">
-                <div class="bg-gray-50 p-3 rounded-lg border">
-                    <span class="text-xs text-gray-500 uppercase font-semibold">Patienten-Details</span>
-                    <p id="modal-demographics" class="text-sm font-medium text-gray-800">-</p>
-                </div>
-
-                <div class="bg-red-50 p-3 rounded-lg border border-red-100">
-                    <span class="text-xs text-red-500 uppercase font-semibold">Klinischer Befund / Verletzungen</span>
-                    <p id="modal-injury" class="text-sm font-medium text-red-900">-</p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                        <span class="text-xs text-blue-500 uppercase font-semibold">Vitalparameter & Labor</span>
-                        <div id="modal-vitals" class="text-sm font-medium text-blue-900 mt-1 space-y-1">
-                            <!-- Dynamische Vitalwerte -->
-                        </div>
-                    </div>
-                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-100">
-                        <span class="text-xs text-amber-600 uppercase font-semibold">mSTART-Triage</span>
-                        <p id="modal-triage" class="text-lg font-bold mt-1">-</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-6 flex justify-end">
-                <button onclick="closeModal()" class="bg-gray-800 text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-700">Schließen</button>
-            </div>
+        <div class="info-box-action">
+          <button class="btn-start" id="btn-header-name" onclick="runCountdown('header-name', 5)">Start</button>
+          <span class="timer-text" id="timer-header-name" style="display:none;">5s</span>
         </div>
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-content">
+          <label>Alter / Geschlecht</label>
+          <span id="val-header-age-gender" class="hidden-val">---</span>
+          <span id="real-val-header-age-gender" style="display:none;"></span>
+        </div>
+        <div class="info-box-action">
+          <button class="btn-start" id="btn-header-age-gender" onclick="runCountdown('header-age-gender', 5)">Start</button>
+          <span class="timer-text" id="timer-header-age-gender" style="display:none;">5s</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Skript zur Generierung der Patientendaten und QR-Codes -->
-    <script>
-        const baseUrl = "https://ra1986gmxnet.github.io/ManV-bung/?id=";
+    <div class="info-box" style="margin-top:6px;">
+      <div class="info-box-content">
+        <label>Ersteindruck</label>
+        <span id="val-header-impression" class="hidden-val">---</span>
+        <span id="real-val-header-impression" style="display:none;"></span>
+      </div>
+      <div class="info-box-action">
+        <button class="btn-start" id="btn-header-impression" onclick="runCountdown('header-impression', 5)">Start</button>
+        <span class="timer-text" id="timer-header-impression" style="display:none;">5s</span>
+      </div>
+    </div>
 
-        const firstNames = ["Max", "Anna", "Michael", "Sarah", "Johannes", "Maria", "David", "Laura", "Stefan", "Julia", "Thomas", "Lisa", "Christian", "Elena", "Felix", "Karin", "Lukas", "Hannah", "Jan", "Sophie"];
-        const lastNames = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann", "Schäfer", "Koch", "Bauer", "Richter", "Klein", "Wolf", "Schröder", "Neumann", "Schwarz", "Zimmermann"];
+    <div class="info-box" style="margin-top:6px;">
+      <div class="info-box-content">
+        <label>Gehfähigkeit / Mobilität</label>
+        <span id="val-header-walking" class="hidden-val">---</span>
+        <span id="real-val-header-walking" style="display:none;"></span>
+      </div>
+      <div class="info-box-action">
+        <button class="btn-start" id="btn-header-walking" onclick="runCountdown('header-walking', 5)">Start</button>
+        <span class="timer-text" id="timer-header-walking" style="display:none;">5s</span>
+      </div>
+    </div>
 
-        // Verletzungspool inklusive Basiswerten für HF, SpO2, CO, Hb und RR
-        const injuryPool = [
-            { text: "Offene Unterschenkelfraktur links mit starker arterieller Blutung", cat: "ROT", priority: 1, baseHr: 125, baseSpo2: 92, baseCo: 2, baseHb: 8.5, baseRr: "90/60" },
-            { text: "Verbrühungen 2. Grades im Gesicht und am Torso, Rußspuren im Mund- und Nasenraum, Stridor", cat: "ROT", priority: 2, baseHr: 135, baseSpo2: 78, baseCo: 28, baseHb: 16.2, baseRr: "110/75" },
-            { text: "Polytrauma nach Sturz aus Höhe, Thoraxfraktur, unregelmäßige flache Atmung", cat: "ROT", priority: 3, baseHr: 50, baseSpo2: 80, baseCo: 4, baseHb: 9.0, baseRr: "70/40" },
-            { text: "Verbrennungen 3. Grades im Gesicht, Ruß im Rachenraum, stark veränderte Stimmritze, akute Atemnot", cat: "ROT", priority: 4, baseHr: 140, baseSpo2: 72, baseCo: 35, baseHb: 17.0, baseRr: "120/80" },
-            { text: "Geschlossene Oberschenkel-Fraktur beidseitig, ansprechbar, Schmerzen", cat: "GELB", priority: 5, baseHr: 95, baseSpo2: 96, baseCo: 1, baseHb: 13.5, baseRr: "125/80" },
-            { text: "Leichte Rauchgasinhalation, Hustenreiz, Rußspuren im Gesicht, leichte Benommenheit", cat: "GELB", priority: 6, baseHr: 105, baseSpo2: 91, baseCo: 16, baseHb: 14.8, baseRr: "130/85" },
-            { text: "Schädel-Hirn-Trauma 1. Grades, Amnesie, Übelkeit, ansonsten stabile Vitalwerte", cat: "GELB", priority: 7, baseHr: 88, baseSpo2: 98, baseCo: 2, baseHb: 14.0, baseRr: "135/85" },
-            { text: "Schnittwunden am Unterarm, weichteildominierend, Kreislauf stabil", cat: "GRÜN", priority: 8, baseHr: 80, baseSpo2: 99, baseCo: 1, baseHb: 13.8, baseRr: "120/80" },
-            { text: "Akute Belastungsreaktion (Schock ohne physische Verletzung), orientiert", cat: "GRÜN", priority: 9, baseHr: 100, baseSpo2: 98, baseCo: 1, baseHb: 14.2, baseRr: "140/90" },
-            { text: "Keine Vitalzeichen, keine Atmung, Pulslos nach schwerem Inhalationstrauma", cat: "SCHWARZ", priority: 10, baseHr: 0, baseSpo2: 0, baseCo: 45, baseHb: 12.0, baseRr: "0/0" }
-        ];
+    <div class="info-box alert-box" style="margin-top:6px;">
+      <div class="info-box-content">
+        <label style="color: var(--ral-3024);">Offensichtliche Beobachtungen / äußere Befunde</label>
+        <span id="val-header-injuries" class="hidden-val" style="font-weight: bold; color: var(--ral-3024);">---</span>
+        <span id="real-val-header-injuries" style="display:none;"></span>
+      </div>
+      <div class="info-box-action">
+        <button class="btn-start" id="btn-header-injuries" onclick="runCountdown('header-injuries', 5)">Start</button>
+        <span class="timer-text" id="timer-header-injuries" style="display:none;">5s</span>
+      </div>
+    </div>
+  </div>
 
-        function seededRandom(seed) {
-            let x = Math.sin(seed++) * 10000;
-            return x - Math.floor(x);
+  <div class="body-schema-section">
+    <div class="section-title">
+      <span>Verletzungsmuster / Körperstatus (Lokale Befunde)</span>
+      <div>
+        <button class="btn-start" id="btn-body-schema" onclick="runCountdown('body-schema', 5, revealBodyMarkers)">Start</button>
+        <span class="timer-text" id="timer-body-schema" style="display:none; color: #ffffff;">5s</span>
+      </div>
+    </div>
+    <div class="body-container">
+      <div>
+        <div class="body-label">Vorderseite</div>
+        <div class="body-view" id="front-view">
+          <svg class="body-svg" viewBox="0 0 100 200">
+            <circle cx="50" cy="18" r="11"/>
+            <rect x="44" y="29" width="12" height="6" rx="1"/>
+            <rect x="28" y="35" width="44" height="60" rx="4"/>
+            <rect x="15" y="35" width="11" height="65" rx="3"/>
+            <rect x="74" y="35" width="11" height="65" rx="3"/>
+            <rect x="32" y="97" width="15" height="85" rx="3"/>
+            <rect x="53" y="97" width="15" height="85" rx="3"/>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div class="body-label">Rückseite</div>
+        <div class="body-view" id="back-view">
+          <svg class="body-svg" viewBox="0 0 100 200">
+            <circle cx="50" cy="18" r="11"/>
+            <rect x="44" y="29" width="12" height="6" rx="1"/>
+            <rect x="28" y="35" width="44" height="60" rx="4"/>
+            <rect x="15" y="35" width="11" height="65" rx="3"/>
+            <rect x="74" y="35" width="11" height="65" rx="3"/>
+            <rect x="32" y="97" width="15" height="85" rx="3"/>
+            <rect x="53" y="97" width="15" height="85" rx="3"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div>
+      <div class="card">
+        <div class="card-header">x-ABCDE Schema (Klinischer Befund)</div>
+        <table class="interactive-table"><tbody id="table-abcde"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-header">SAMPLER Anamnese</div>
+        <table class="interactive-table"><tbody id="table-sampler"></tbody></table>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-header">Vitalparameter / Messwerte</div>
+        <table class="interactive-table"><tbody id="table-vitals"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-header">Klinische Scores & Assessment-Tools</div>
+        <table class="interactive-table"><tbody id="table-scores"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let isTimerRunning = false;
+
+  const germanLastnames = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann", "Schäfer", "Koch", "Bauer", "Richter", "Klein", "Wolf", "Schröder", "Neumann", "Schwarz", "Zimmermann", "Braun", "Kröger", "Hartmann", "Lange", "Schmitt", "Werner", "Schmitz", "Krause", "Meier", "Lehmann"];
+  const germanFirstnamesM = ["Lukas", "Leon", "Finn", "Paul", "Jonas", "Felix", "Maximilian", "Henry", "Noah", "Elias", "Ben", "Luca", "David", "Alexander", "Philipp", "Niklas", "Tim", "Jan", "Tobias", "Florian"];
+  const germanFirstnamesF = ["Emma", "Mia", "Sophia", "Hannah", "Emilia", "Anna", "Lina", "Marie", "Mila", "Lea", "Clara", "Nele", "Johanna", "Laura", "Sarah", "Julia", "Katharina", "Christina", "Stefanie"];
+  const internationalNames = [
+    { name: "van Dijk, Jan", gender: "m" },
+    { name: "Smith, Oliver", gender: "m" },
+    { name: "Dubois, Camille", gender: "f" },
+    { name: "Jensen, Lars", gender: "m" },
+    { name: "Shevchenko, Olena", gender: "f" },
+    { name: "Al-Mansoor, Tariq", gender: "m" },
+    { name: "Ivanov, Dmitry", gender: "m" },
+    { name: "Rossi, Matteo", gender: "m" },
+    { name: "Garcia, Sofia", gender: "f" },
+    { name: "Silva, Joao", gender: "m" }
+  ];
+
+  const adultRiskPool = ["Keine bekannt", "Nikotinabusus", "Chronischer Alkoholabusus", "Mangelernährung / Untergewicht", "Diabetes Mellitus Typ 2", "Z.n. Herzinfarkt", "Arterielle Hypertonie", "Asthma bronchiale", "Adipositas"];
+  const pediatricRiskPool = ["Keine bekannt", "Passivrauchbelastung im Haushalt", "Bekannte Neigung zu Fieberkrämpfen", "Frühgeburtlichkeit in Anamnese"];
+  const adultHistoryPool = [
+    { history: "Arterielle Hypertonie", med: "Ramipril 5mg" },
+    { history: "Diabetes Mellitus Typ 2", med: "Metformin 850mg" },
+    { history: "Z.n. Herzinfarkt", med: "ASS 100mg" },
+    { history: "Chronische Bronchitis (COPD)", med: "Tiotropium Inhalator" },
+    { history: "Keine wesentlichen Vorerkrankungen", med: "Keine Dauermedikation" }
+  ];
+
+  function seededRandom(seed) {
+    let x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+  }
+
+  function getEstimatedAgeString(ageInYears) {
+    if (ageInYears < 0.08) return `ca. ${Math.max(1, Math.floor(ageInYears * 365))} Tage`;
+    if (ageInYears < 1.0) return `ca. ${Math.max(1, Math.floor(ageInYears * 12))} Monate`;
+    if (ageInYears <= 12) return `ca. ${Math.round(ageInYears)} Jahre`;
+    const exactAge = Math.round(ageInYears);
+    const decade = Math.floor(exactAge / 10) * 10;
+    const lastDigit = exactAge % 10;
+    if (lastDigit >= 1 && lastDigit <= 3) return `Anfang ${decade}`;
+    if (lastDigit >= 4 && lastDigit <= 6) return `Mitte ${decade}`;
+    if (lastDigit >= 7 && lastDigit <= 9) return `Ende ${decade}`;
+    return `ca. ${exactAge} Jahre`;
+  }
+
+  function formatGCSDetail(e, v, m) {
+    let eText = e === 4 ? "Spontan (4 P.)" : e === 3 ? "Bei Ansprache (3 P.)" : e === 2 ? "Bei Schmerzreiz (2 P.)" : "Kein Öffnen der Augen (1 P.)";
+    let vText = v === 5 ? "Konversationsfähig, orientiert (5 P.)" : v === 4 ? "Konversationsfähig, desorientiert (4 P.)" : v === 3 ? "Einzelworte/Wortsalat (3 P.)" : v === 2 ? "Sinnlose Laute (2 P.)" : "Keine verbale Antwort (1 P.)";
+    let mText = m === 6 ? "Bei Aufforderung (6 P.)" : m === 5 ? "Gezielte Bewegung bei Schmerzreiz (5 P.)" : m === 4 ? "Ungezielte Bewegung auf Schmerzreiz (4 P.)" : m === 3 ? "Beugesynergismen (3 P.)" : m === 2 ? "Strecksynergismen (2 P.)" : "Keine motorische Reaktion (1 P.)";
+    let total = e + v + m;
+    return `Gesamt: ${total} P. (Augen: ${eText}, Verbal: ${vText}, Motorisch: ${mText})`;
+  }
+
+  function getExplosionInjuryData(index, category, isChild, isUnderTwo, ageInYears) {
+    let walking = "", abcdeB = "", abcdeC = "", abcdeD = "", abcdeE = "", samplerSymptom = "";
+    let p = "Puls: 80 bpm", rr = "RR: 120/80 mmHg", af = "AF: 16 / min", spo2 = "SpO2: 98 %", rekap = "ReKap: < 2 sek (vital stabil)", hb = "Hb: 13.8 g/dl";
+    let bz = "BZ: 95 mg/dl", temp = "Temp: 36.6 °C", etco2 = "etCO2: 38 mmHg", co = "CO: < 2 %", spmet = "SpMet: < 1.5 %";
+    let gcsE = 4, gcsV = 5, gcsM = 6, newsVal = 0, qsofaVal = 0, x = "Keine";
+    let isUnconsciousPat = (category === "ROT" || category === "SCHWARZ" || category === "BLAU");
+
+    let befast = isUnconsciousPat ? 
+      "BE-FAST Schema: Nicht beurteilbar (Patient bewusstlos / nicht kooperabel)" : 
+      "BE-FAST: Unauffällig (0 Pkt - Keine Anzeichen für Schlaganfall / Hirndruck)";
+
+    let nexus = "NEXUS: Unauffällig (0 Pkt - Kein HWS-Schmerz, keine neurologischen Ausfälle, uneingeschränkt wach)"; 
+    let wells = "Wells-Score: Unauffällig (< 2 Pkt - Geringes Risiko für tiefe Venenthrombose / Lungenembolie)"; 
+    let spesi = "sPESI: Niedriges Risiko (0 Pkt - Keine kardiorespiratorische Dekompensation zu erwarten)"; 
+    let apgar = isUnderTwo ? "APGAR-Schema: 9 Punkte (Normal - Atmung, Herzschlag und Hautfarbe altersgerecht stabil)" : "APGAR-Schema: N/A (Nicht anwendbar - Patient ist kein Neugeborenes)";
+
+    if (category === "GRÜN") {
+      walking = (ageInYears < 2.0) ? "Nein" : "Ja";
+      const greenTypes = [
+        { imp: "Wach, orientiert, klagt über Schmerzen an der Stirn.", inj: "Blutende Risswunde Stirn rechts.", markers: [{view:"front", top:"15%", left:"55%", text:"Risswunde"}], b:"Frei", c:"Kräftig", d:"GCS 15", e:"Unauffällig", sym:"Schmerzen", p:"Puls: 88 bpm", rr:"RR: 125/80 mmHg", af:"AF: 18 / min", spo2:"SpO2: 98 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 13.2 g/dl", news:0, e:4, v:5, m:6 },
+        { imp: "Aufgeregt, hält sich die Hand ans Ohr, Tinnitus.", inj: "Keine äußeren Wunden erkennbar.", markers: [{view:"front", top:"18%", left:"30%", text:"Ohrschmerz"}], b:"Frei", c:"Normal", d:"GCS 15", e:"Keine", sym:"Tinnitus", p:"Puls: 96 bpm", rr:"RR: 130/85 mmHg", af:"AF: 20 / min", spo2:"SpO2: 99 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 14.0 g/dl", news:1, e:4, v:5, m:6 },
+        { imp: "Hustet leicht, Gesicht leicht verschmutzt.", inj: "Rußanhaftungen im Gesicht.", markers: [{view:"front", top:"18%", left:"50%", text:"Ruß"}], b:"Husten", c:"Stabil", d:"GCS 15", e:"Intakt", sym:"Hustenreiz", p:"Puls: 82 bpm", rr:"RR: 120/75 mmHg", af:"AF: 16 / min", spo2:"SpO2: 97 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 13.5 g/dl", news:0, e:4, v:5, m:6 },
+        { imp: "Schont das rechte Bein, humpelt.", inj: "Schwellung am Sprunggelenk.", markers: [{view:"front", top:"85%", left:"60%", text:"Schwellung"}], b:"Frei", c:"Stabil", d:"GCS 15", e:"Lokal", sym:"Schmerz", p:"Puls: 90 bpm", rr:"RR: 115/75 mmHg", af:"AF: 18 / min", spo2:"SpO2: 99 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 13.1 g/dl", news:0, e:4, v:5, m:6 },
+        { imp: "Flacher Atem, Schmerzen bei der Atmung.", inj: "Thoraxprellung links.", markers: [{view:"front", top:"42%", left:"35%", text:"Prellung"}], b:"Schmerzhaft", c:"Regulär", d:"GCS 15", e:"Intakt", sym:"Thoraxschmerz", p:"Puls: 92 bpm", rr:"RR: 135/85 mmHg", af:"AF: 19 / min", spo2:"SpO2: 98 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 12.8 g/dl", news:1, e:4, v:5, m:6 },
+        { imp: "Klagt über dumpfe Kopfschmerzen.", inj: "Hämatom am Hinterkopf.", markers: [{view:"back", top:"15%", left:"50%", text:"Hämatom"}], b:"Frei", c:"Stabil", d:"GCS 15", e:"Keine", sym:"Kopfschmerz", p:"Puls: 84 bpm", rr:"RR: 125/80 mmHg", af:"AF: 16 / min", spo2:"SpO2: 99 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 13.9 g/dl", news:0, e:4, v:5, m:6 },
+        { imp: "Unruhig, berichtet über Hitzegefühl.", inj: "Rötung am Unterarm.", markers: [{view:"front", top:"52%", left:"80%", text:"Erythem"}], b:"Frei", c:"Tachykard", d:"GCS 15", e:"Erythem", sym:"Brennen", p:"Puls: 104 bpm", rr:"RR: 140/90 mmHg", af:"AF: 22 / min", spo2:"SpO2: 98 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 14.2 g/dl", news:2, e:4, v:5, m:6 }
+      ];
+      let sel = greenTypes[(index * 7) % greenTypes.length];
+      let gcsStr = formatGCSDetail(sel.e, sel.v, sel.m);
+      let newsStr = isChild ? "N/A (Nur für Erwachsene)" : `NEWS2-Score: ${sel.news} Punkte (Geringes akutes Risiko, normale Überwachung)`;
+      let qsofaStr = isChild ? "N/A (Nur für Erwachsene)" : "qSOFA-Score: 0 Punkte (Keine Organversagen-Indikation)";
+      return { imp: sel.imp, walk: walking, inj: sel.inj, markers: sel.markers, b: sel.b, c: sel.c, d: sel.d, e: sel.e, sym: sel.sym, p: sel.p, rr: sel.rr, af: sel.af, spo2: sel.spo2, rekap: sel.rekap, hb: sel.hb, bz:"BZ: 102 mg/dl", temp:"Temp: 36.8 °C", etco2:"etCO2: 37 mmHg", co:"CO: < 2 %", spmet:"SpMet: < 1.0 %", gcsDetail: gcsStr, news: newsStr, qsofa: qsofaStr, x:"Keine", befast, nexus, wells, spesi, apgar };
+    } else if (category === "GELB") {
+      walking = "Nein";
+      const yellowTypes = [
+        { imp: "Wach, starke Schmerzen, eingeschränkte Beweglichkeit.", inj: "Fehlstellung Unterschenkel li.", markers: [{view:"front", top:"78%", left:"40%", text:"Fehlstellung"}], b:"Frei", c:"Kräftig", d:"GCS 15", e:"Hämatom", sym:"Dauerschmerz", p:"Puls: 108 bpm", rr:"RR: 145/95 mmHg", af:"AF: 22 / min", spo2:"SpO2: 96 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 11.5 g/dl", news:3, e:4, v:5, m:6 },
+        { imp: "Atemfrequenz erhöht, Ruß im Mund- und Nasenbereich.", inj: "Verbrennungen im Gesicht.", markers: [{view:"front", top:"22%", left:"50%", text:"Verbrennung"}], b:"Rasselgeräusche", c:"Stabil", d:"GCS 15", e:"Blasen", sym:"Luftnot", p:"Puls: 112 bpm", rr:"RR: 130/85 mmHg", af:"AF: 26 / min", spo2:"SpO2: 93 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 12.0 g/dl", news:4, e:4, v:5, m:6 },
+        { imp: "Verlangsamt, reagiert verzögert auf Ansprache.", inj: "Platzwunde Hinterkopf.", markers: [{view:"back", top:"14%", left:"50%", text:"Platzwunde"}], b:"Frei", c:"Hyperton", d:"GCS 13", e:"Blutung", sym:"Schwindel", p:"Puls: 76 bpm", rr:"RR: 150/95 mmHg", af:"AF: 15 / min", spo2:"SpO2: 98 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 12.5 g/dl", news:2, e:3, v:4, m:6 },
+        { imp: "Schont die rechte Schulter, Fehlhaltung.", inj: "Schulterdeformität re.", markers: [{view:"front", top:"38%", left:"75%", text:"Deformität"}], b:"Frei", c:"Normal", d:"GCS 15", e:"Lokal", sym:"Schmerz", p:"Puls: 98 bpm", rr:"RR: 135/85 mmHg", af:"AF: 18 / min", spo2:"SpO2: 98 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 13.0 g/dl", news:1, e:4, v:5, m:6 },
+        { imp: "Deutliche Atemnot, Schmerzen beim Einatmen.", inj: "Verletzung des Brustkorbs.", markers: [{view:"front", top:"42%", left:"32%", text:"Thoraxtrauma"}], b:"Eingeschränkt", c:"Tachykard", d:"GCS 15", e:"Druckschmerz", sym:"Schmerz", p:"Puls: 115 bpm", rr:"RR: 140/90 mmHg", af:"AF: 28 / min", spo2:"SpO2: 92 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 11.2 g/dl", news:5, e:4, v:5, m:6 },
+        { imp: "Große Hämatome an den Extremitäten.", inj: "Weichteilblutung Oberschenkel.", markers: [{view:"front", top:"65%", left:"40%", text:"Ödem"}], b:"Frei", c:"Stabil", d:"GCS 15", e:"Ödeme", sym:"Schmerz", p:"Puls: 102 bpm", rr:"RR: 125/80 mmHg", af:"AF: 20 / min", spo2:"SpO2: 97 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 10.8 g/dl", news:2, e:4, v:5, m:6 }
+      ];
+      let sel = yellowTypes[(index * 5) % yellowTypes.length];
+      let gcsStr = formatGCSDetail(sel.e, sel.v, sel.m);
+      let newsStr = isChild ? "N/A (Nur für Erwachsene)" : `NEWS2-Score: ${sel.news} Punkte (Mittleres Risiko oder Einzelparameter-Auffälligkeit)`;
+      let qsofaStr = isChild ? "N/A (Nur für Erwachsene)" : "qSOFA-Score: 0 Punkte (Keine akute Sepsis-Kriterien erfüllt)";
+      return { imp: sel.imp, walk: walking, inj: sel.inj, markers: sel.markers, b: sel.b, c: sel.c, d: sel.d, e: sel.e, sym: sel.sym, p: sel.p, rr: sel.rr, af: sel.af, spo2: sel.spo2, rekap: sel.rekap, hb: sel.hb, bz:"BZ: 110 mg/dl", temp:"Temp: 36.5 °C", etco2:"etCO2: 35 mmHg", co:"CO: < 3 %", spmet:"SpMet: < 1.5 %", gcsDetail: gcsStr, news: newsStr, qsofa: qsofaStr, x:"Keine", befast, nexus, wells, spesi, apgar };
+    } else if (category === "ROT") {
+      walking = "Nein";
+      const redTypes = [
+        { imp: "Apathisch, blass, Kreislaufzeichen unzureichend.", inj: "Arterielle Blutung Oberschenkel.", markers: [{view:"front", top:"65%", left:"65%", text:"Arterielle Blutung"}], x:"Aktive Blutung", b:"Tachypnoe", c:"Schwach", d:"GCS 10", e:"Hypothermie", sym:"Verwirrt", p:"Puls: 148 bpm", rr:"RR: 70/40 mmHg", af:"AF: 34 / min", spo2:"SpO2: 84 %", rekap:"ReKap: > 2 sek (instabil / gefährdet)", hb:"Hb: 6.8 g/dl (Schock / Anämie)", news:12, eVal:2, vVal:3, mVal:5 },
+        { imp: "Akute Atemnot, Einziehungen, Zyanose.", inj: "Inhalationstrauma.", markers: [{view:"front", top:"18%", left:"50%", text:"Inhalation"}], x:"Keine", b:"Stridor", c:"Hyperton", d:"GCS 11", e:"Verbrennung", sym:"Luftnot", p:"Puls: 135 bpm", rr:"RR: 160/100 mmHg", af:"AF: 38 / min", spo2:"SpO2: 78 %", rekap:"ReKap: < 2 sek (vital stabil)", hb:"Hb: 12.4 g/dl", news:10, eVal:3, vVal:3, mVal:5 },
+        { imp: "Bewusstlos, unregelmäßige Atmung.", inj: "Schweres Schädel-Hirn-Trauma.", markers: [{view:"front", top:"14%", left:"50%", text:"SHT"}], x:"Keine", b:"Ineffektiv", c:"Bradykard", d:"GCS 6", e:"Neurologisch", sym:"Keine", p:"Puls: 52 bpm", rr:"RR: 180/110 mmHg", af:"AF: 8 / min", spo2:"SpO2: 82 %", rekap:"ReKap: > 2 sek (instabil / gefährdet)", hb:"Hb: 13.0 g/dl", news:11, eVal:1, vVal:2, mVal:3 },
+        { imp: "Massives Thoraxtrauma, instabezirkliche Brustwandbewegung.", inj: "Schweres stumpfes Thoraxtrauma.", markers: [{view:"front", top:"42%", left:"32%", text:"Thoraxtrauma"}], x:"Keine", b:"Asymmetrisch", c:"Filiform", d:"GCS 9", e:"Deformiert", sym:"Extreme Luftnot", p:"Puls: 155 bpm", rr:"RR: 80/50 mmHg", af:"AF: 42 / min", spo2:"SpO2: 75 %", rekap:"ReKap: > 2 sek (instabil / gefährdet)", hb:"Hb: 7.5 g/dl", news:14, eVal:2, vVal:2, mVal:5 },
+        { imp: "Traumatische Amputation, starker Blutverlust.", inj: "Amputation Unterschenkel li.", markers: [{view:"front", top:"78%", left:"40%", text:"Amputation"}], x:"Blutung Stumpf", b:"Tachypnoe", c:"Schock", d:"GCS 12", e:"Kritisch", sym:"Schmerz", p:"Puls: 140 bpm", rr:"RR: 85/55 mmHg", af:"AF: 30 / min", spo2:"SpO2: 88 %", rekap:"ReKap: > 2 sek (instabil / gefährdet)", hb:"Hb: 7.0 g/dl (Akuter Blutverlust)", news:9, eVal:3, vVal:3, mVal:6 },
+        { imp: "Großflächige Verbrennungen, Kreislauf instabil.", inj: "Verbrennungen 45% KOF.", markers: [{view:"front", top:"45%", left:"50%", text:"Verbrennung"}], x:"Keine", b:"Beschleunigt", c:"Schwach", d:"GCS 10", e:"Verbrannt", sym:"Apathie", p:"Puls: 142 bpm", rr:"RR: 75/50 mmHg", af:"AF: 32 / min", spo2:"SpO2: 85 %", rekap:"ReKap: > 2 sek (instabil / gefährdet)", hb:"Hb: 10.5 g/dl (Hämokonzentration)", news:12, eVal:2, vVal:3, mVal:5 }
+      ];
+      let sel = redTypes[(index * 3) % redTypes.length];
+      let isCO = sel.inj.includes("Inhalation") ? "CO: 18 % (Erhöht)" : "CO: < 2 %";
+      let gcsStr = formatGCSDetail(sel.eVal, sel.vVal, sel.mVal);
+      let newsStr = isChild ? "N/A (Nur für Erwachsene)" : `NEWS2-Score: ${sel.news} Punkte (Kritischer Bereich >= 7, hoher Alarm)`;
+      let qsofaStr = isChild ? "N/A (Nur für Erwachsene)" : "qSOFA-Score: 2 Punkte (Hohes Risiko für schlechten klinischen Verlauf / Sepsis-Verdacht)";
+      return { imp: sel.imp, walk: walking, inj: sel.inj, markers: sel.markers, b: sel.b, c: sel.c, d: sel.d, e: sel.e, sym: sel.sym, p: sel.p, rr: sel.rr, af: sel.af, spo2: sel.spo2, rekap: sel.rekap, hb: sel.hb, bz:"BZ: 145 mg/dl", temp:"Temp: 35.2 °C (Hypothermie)", etco2:"etCO2: 24 mmHg", co:isCO, spmet:"SpMet: < 1.5 %", gcsDetail: gcsStr, news: newsStr, qsofa: qsofaStr, x:sel.x, befast, nexus, wells, spesi, apgar };
+    } else if (category === "SCHWARZ") {
+      walking = "Nein";
+      let gcsStr = formatGCSDetail(1, 1, 1);
+      return { imp: "Reglos, keine Spontanatmung, keine Lebenszeichen.", walk: walking, inj: "Letales Schädel-Hirn-Trauma.", markers: [{view:"front", top:"14%", left:"50%", text:"Letal"}], b:"Keine", c:"Kein Puls", d:"GCS 3", e:"Letal", sym:"Keine", p:"Puls: 0 bpm", rr:"RR: 0/0 mmHg", af:"AF: 0 / min", spo2:"SpO2: 0 %", rekap:"ReKap: > 3 sek (Kein Kreislauf)", hb: "Hb: N/A", bz:"BZ: 0 mg/dl", temp:"Temp: 32.0 °C", etco2:"etCO2: 0 mmHg", co:"CO: N/A", spmet:"SpMet: N/A", gcsDetail: gcsStr, news: "NEWS2-Score: N/A (Reanimation / Exitus)", qsofa: "qSOFA-Score: 3 Punkte (Maximaler Score)", x:"Keine", befast, nexus, wells, spesi, apgar };
+    } else {
+      walking = "Nein";
+      let gcsStr = formatGCSDetail(1, 1, 2);
+      return { imp: "Schwere letale Verletzungen, keine Überlebenschance.", inj: "95% Verbrennungen.", markers: [{view:"front", top:"45%", left:"50%", text:"Verkohlung"}], b:"Schnappatmung", c:"Extrem schwach", d:"GCS 4", e:"Verkohlt", sym:"Keine", p:"Puls: 45 bpm", rr:"RR: 50/20 mmHg", af:"AF: 6 / min", spo2:"SpO2: 50 %", rekap:"ReKap: > 3 sek (Extrem instabil)", hb: "Hb: 5.0 g/dl", bz:"BZ: 60 mg/dl", temp:"Temp: 33.5 °C", etco2:"etCO2: 15 mmHg", co:"CO: 25 %", spmet:"SpMet: < 2.0 %", gcsDetail: gcsStr, news: "NEWS2-Score: 14 Punkte (Extremer Risikobereich)", qsofa: "qSOFA-Score: 3 Punkte (Maximaler Score)", x:"Keine", befast, nexus, wells, spesi, apgar };
+    }
+  }
+
+  function generatePatients() {
+    let list = [], usedNames = new Set(), intIndex = 0;
+
+    let categoryPool = [];
+    for (let i = 0; i < 22; i++) categoryPool.push("ROT");
+    for (let i = 0; i < 5; i++) categoryPool.push("SCHWARZ");
+    for (let i = 0; i < 3; i++) categoryPool.push("BLAU");
+    for (let i = 0; i < 40; i++) categoryPool.push("GELB");
+    for (let i = 0; i < 30; i++) categoryPool.push("GRÜN");
+
+    let seed = 1337;
+    for (let i = categoryPool.length - 1; i > 0; i--) {
+      let j = Math.floor(seededRandom(seed++) * (i + 1));
+      let temp = categoryPool[i];
+      categoryPool[i] = categoryPool[j];
+      categoryPool[j] = temp;
+    }
+
+    for (let i = 1; i <= 100; i++) {
+      let category = categoryPool[i - 1];
+      let isFemale = i % 2 === 0;
+      let ageInYears = (i % 15 === 0) ? 0.02 : (i % 10 === 0) ? 0.5 : (i % 7 === 0) ? 4 : (i % 25 === 0) ? 11 : 18 + (i * 7) % 62;
+      let isChild = ageInYears < 14, isUnderTwo = ageInYears < 2.0, isUnconscious = (category === "ROT" || category === "SCHWARZ" || category === "BLAU");
+
+      let fullName = "";
+      if (i % 6 === 0 && intIndex < internationalNames.length) {
+        let intPat = internationalNames[intIndex++];
+        fullName = intPat.name; isFemale = intPat.gender === 'f';
+      } else {
+        let fnList = isFemale ? germanFirstnamesF : germanFirstnamesM;
+        let fn = fnList[(i * 3) % fnList.length], ln = germanLastnames[(i * 7) % germanLastnames.length];
+        fullName = `${ln}, ${fn}`;
+        let c = 1;
+        while (usedNames.has(fullName)) {
+          ln = germanLastnames[(i * 7 + c) % germanLastnames.length];
+          fn = fnList[(i * 3 + c) % fnList.length];
+          fullName = `${ln}, ${fn}`; c++;
         }
+      }
+      usedNames.add(fullName);
 
-        function generatePatients() {
-            let patients = [];
-            for (let i = 1; i <= 100; i++) {
-                let r1 = seededRandom(i * 13);
-                let r2 = seededRandom(i * 37);
-                let r3 = seededRandom(i * 53);
+      let gender = isFemale ? "weiblich" : "männlich";
+      let riskFactor = isChild ? pediatricRiskPool[(i * 7) % pediatricRiskPool.length] : adultRiskPool[(i * 13 + 7) % adultRiskPool.length];
+      let historyItem = isChild ? { history: "Keine", med: "Keine" } : adultHistoryPool[(i * 3) % adultHistoryPool.length];
+      let ageGenderString = isUnconscious ? `${getEstimatedAgeString(ageInYears)} / ${gender}` : (ageInYears < 1 ? `${Math.max(1, Math.floor(ageInYears * 12))} Mon. / ${gender}` : `${Math.round(ageInYears)} J. / ${gender}`);
 
-                let firstName = firstNames[Math.floor(r1 * firstNames.length)];
-                let lastName = lastNames[Math.floor(r2 * lastNames.length)];
-                let age = Math.floor(r3 * 65) + 18;
+      let injData = getExplosionInjuryData(i, category, isChild, isUnderTwo, ageInYears);
 
-                let injuryObj = injuryPool[(i - 1) % injuryPool.length];
-                
-                // Variationen für Realismus
-                let hrVariation = Math.floor(seededRandom(i * 7) * 11) - 5;
-                let spo2Variation = Math.floor(seededRandom(i * 11) * 5) - 2;
-                let coVariation = Math.floor(seededRandom(i * 17) * 5) - 2;
-                let hbVariation = Number((seededRandom(i * 23) * 1.6 - 0.8).toFixed(1));
+      list.push({
+        id: i,
+        name: isUnconscious ? "Unbekannt (Bewusstlos)" : fullName,
+        ageGender: ageGenderString,
+        impression: injData.imp,
+        walkingAbility: injData.walk,
+        visibleInjuries: injData.inj,
+        trueCategory: category,
+        markers: injData.markers,
+        abcde: [
+          { key: "eXsanguination", letter: "x", val: injData.x },
+          { key: "Airway", letter: "A", val: category === "SCHWARZ" ? "Vollständig verlegt" : isUnconscious ? "Bedroht" : "Frei" },
+          { key: "Breathing", letter: "B", val: injData.b },
+          { key: "Circulation", letter: "C", val: injData.c },
+          { key: "Disability", letter: "D", val: injData.d },
+          { key: "Exposure", letter: "E", val: injData.e }
+        ],
+        sampler: [
+          { key: "Symptome", val: injData.sym },
+          { key: "Allergien", val: "Keine bekannt" },
+          { key: "Medikation", val: historyItem.med },
+          { key: "Patientengeschichte", val: historyItem.history },
+          { key: "Letzte Mahlzeit", val: isUnconscious ? "Unbekannt" : "Vor Stunden" },
+          { key: "Ereignis", val: "Explosion" },
+          { key: "Risikofaktoren", val: riskFactor }
+        ],
+        vitals: [
+          { key: "Puls", val: injData.p },
+          { key: "RR (Blutdruck)", val: injData.rr },
+          { key: "ReKap (Rekapillarisierungszeit)", val: injData.rekap },
+          { key: "Hb (Hämoglobin)", val: injData.hb },
+          { key: "AF (Atemfrequenz)", val: injData.af },
+          { key: "SpO2 (Sauerstoffpartialsättigung)", val: injData.spo2 },
+          { key: "BZ (Blutzucker)", val: injData.bz },
+          { key: "Temp (Körpertemperatur)", val: injData.temp },
+          { key: "etCO2 (Kapnometrie)", val: injData.etco2 },
+          { key: "CO (Kohlenmonoxid)", val: injData.co },
+          { key: "SpMet (Methämoglobin)", val: injData.spmet }
+        ],
+        scores: [
+          { key: "GCS (Glasgow Coma Scale)", val: injData.gcsDetail },
+          { key: "BE-FAST Schema", val: injData.befast },
+          { key: "NEWS2-Score", val: injData.news },
+          { key: "NEXUS-Kriterien", val: injData.nexus },
+          { key: "qSOFA-Score", val: injData.qsofa },
+          { key: "sPESI-Score", val: injData.spesi },
+          { key: "Wells-Score", val: injData.wells },
+          { key: "APGAR-Schema", val: injData.apgar }
+        ]
+      });
+    }
+    return list;
+  }
 
-                let finalHr = injuryObj.baseHr === 0 ? 0 : Math.max(30, injuryObj.baseHr + hrVariation);
-                let finalSpo2 = injuryObj.baseSpo2 === 0 ? 0 : Math.min(100, Math.max(50, injuryObj.baseSpo2 + spo2Variation));
-                let finalCo = Math.max(1, injuryObj.baseCo + (injuryObj.baseCo > 5 ? coVariation : 0));
-                let finalHb = injuryObj.baseHb === 0 ? 12.0 : Number(Math.max(5.0, injuryObj.baseHb + hbVariation).toFixed(1));
+  const patientsData = generatePatients();
 
-                patients.push({
-                    id: i,
-                    name: `${firstName} ${lastName}`,
-                    age: age,
-                    gender: i % 2 === 0 ? "weiblich" : "männlich",
-                    injury: injuryObj.text,
-                    category: injuryObj.cat,
-                    hr: finalHr,
-                    spo2: finalSpo2,
-                    co: finalCo,
-                    hb: finalHb,
-                    rr: injuryObj.baseRr
-                });
-            }
-            return patients;
+  function getPatientIdFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    let id = parseInt(params.get('id'));
+    if (isNaN(id) || id < 1 || id > 100) return null;
+    return id;
+  }
+
+  window.onload = function() {
+    const params = new URLSearchParams(window.location.search);
+    const isAdminParam = params.has('admin');
+    const exerciseActive = localStorage.getItem('manv_exercise_active') === 'true';
+    const adminLoggedIn = sessionStorage.getItem('manv_admin_logged') === 'true';
+    const patientId = getPatientIdFromUrl();
+
+    if (isAdminParam || adminLoggedIn) {
+      if (adminLoggedIn) {
+        showAdminDashboard();
+      } else {
+        document.getElementById('admin-login-overlay').style.display = 'flex';
+      }
+      return;
+    }
+
+    if (!exerciseActive) {
+      document.getElementById('security-blocker').style.display = 'block';
+      return;
+    }
+
+    if (patientId !== null) {
+      document.getElementById('client-container').style.display = 'block';
+      loadPatientData(patientId);
+    } else {
+      document.getElementById('admin-login-overlay').style.display = 'flex';
+    }
+  };
+
+  function checkAdminLogin() {
+    const u = document.getElementById('login-user').value;
+    const p = document.getElementById('login-pass').value;
+    
+    let customUsers = JSON.parse(localStorage.getItem('manv_custom_users') || "[]");
+    let matchedUser = customUsers.find(user => user.username === u && user.password === p);
+
+    if ((u === "Martin" && p === "Schmall3nb3rg") || matchedUser) {
+      let role = (u === "Martin") ? "master_admin" : matchedUser.role;
+      sessionStorage.setItem('manv_admin_logged', 'true');
+      sessionStorage.setItem('manv_current_user', u);
+      sessionStorage.setItem('manv_current_role', role);
+
+      document.getElementById('admin-login-overlay').style.display = 'none';
+      showAdminDashboard();
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+
+  function adminLogout() {
+    sessionStorage.removeItem('manv_admin_logged');
+    sessionStorage.removeItem('manv_current_user');
+    sessionStorage.removeItem('manv_current_role');
+    location.reload();
+  }
+
+  function startExercise() {
+    localStorage.setItem('manv_exercise_active', 'true');
+    alert("Sichtungsübung wurde gestartet. Teilnehmer haben nun Zugriff über die QR-Codes.");
+  }
+
+  function stopExercise() {
+    localStorage.setItem('manv_exercise_active', 'false');
+    localStorage.removeItem('manv_sichtungen');
+    alert("Sichtungsübung wurde gestoppt. Die Zugriffe wurden gesperrt und Dokumentationen zurückgesetzt.");
+    location.reload();
+  }
+
+  function showAdminDashboard() {
+    document.getElementById('admin-dashboard').style.display = 'block';
+    
+    let currentUser = sessionStorage.getItem('manv_current_user');
+    if (currentUser === "Martin") {
+      document.getElementById('user-management-section').style.display = 'block';
+      renderUserManagementTable();
+    }
+
+    renderAdminTable();
+    updateGesichtetOverview();
+  }
+
+  function addNewUser() {
+    let u = document.getElementById('new-username').value.trim();
+    let p = document.getElementById('new-password').value;
+    let r = document.getElementById('new-role').value;
+
+    if (!u || !p) {
+      alert("Bitte Benutzername und Passwort eingeben.");
+      return;
+    }
+    if (u === "Martin") {
+      alert("Dieser Benutzername ist reserviert.");
+      return;
+    }
+
+    let customUsers = JSON.parse(localStorage.getItem('manv_custom_users') || "[]");
+    if (customUsers.some(user => user.username === u)) {
+      alert("Benutzer existiert bereits.");
+      return;
+    }
+
+    customUsers.push({ username: u, password: p, role: r });
+    localStorage.setItem('manv_custom_users', JSON.stringify(customUsers));
+
+    document.getElementById('new-username').value = "";
+    document.getElementById('new-password').value = "";
+    renderUserManagementTable();
+    alert("Benutzer erfolgreich angelegt.");
+  }
+
+  function deleteUser(username) {
+    let customUsers = JSON.parse(localStorage.getItem('manv_custom_users') || "[]");
+    customUsers = customUsers.filter(user => user.username !== username);
+    localStorage.setItem('manv_custom_users', JSON.stringify(customUsers));
+    renderUserManagementTable();
+  }
+
+  function renderUserManagementTable() {
+    const tbody = document.getElementById('admin-users-rows');
+    tbody.innerHTML = "";
+    let customUsers = JSON.parse(localStorage.getItem('manv_custom_users') || "[]");
+
+    if (customUsers.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" style="color:#64748B; text-align:center;">Keine zusätzlichen Benutzer vorhanden.</td></tr>`;
+      return;
+    }
+
+    customUsers.forEach(user => {
+      let tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${user.username}</td>
+        <td>${user.role === 'admin' ? 'Administrator' : 'Normaler Benutzer'}</td>
+        <td><button class="btn-del-user" onclick="deleteUser('${user.username}')">Löschen</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function getBadgeClass(cat) {
+    if (!cat) return '';
+    const upper = cat.toUpperCase();
+    if (upper === 'ROT') return 'badge-rot';
+    if (upper === 'GELB') return 'badge-gelb';
+    if (upper === 'GRÜN' || upper === 'GRUEN') return 'badge-gruen';
+    if (upper === 'BLAU') return 'badge-blau';
+    if (upper === 'SCHWARZ') return 'badge-schwarz';
+    return '';
+  }
+
+  function renderAdminTable() {
+    const tbody = document.getElementById('admin-patient-rows');
+    tbody.innerHTML = "";
+    let savedSichtungen = JSON.parse(localStorage.getItem('manv_sichtungen') || "{}");
+
+    patientsData.forEach(p => {
+      let tr = document.createElement('tr');
+      let currentSk = savedSichtungen[p.id] || "";
+      let trueBadgeClass = getBadgeClass(p.trueCategory);
+
+      tr.innerHTML = `
+        <td>${p.id}</td>
+        <td>${p.name}</td>
+        <td>${p.ageGender}</td>
+        <td>${p.walkingAbility}</td>
+        <td>${p.impression}</td>
+        <td>${p.visibleInjuries}</td>
+        <td><span class="${trueBadgeClass}"><b>${p.trueCategory}</b></span></td>
+        <td>
+          <div class="sk-buttons">
+            <span class="sk-btn rot ${currentSk==='ROT'?'selected':''}" onclick="setPatientSK(${p.id}, 'ROT')"></span>
+            <span class="sk-btn gelb ${currentSk==='GELB'?'selected':''}" onclick="setPatientSK(${p.id}, 'GELB')"></span>
+            <span class="sk-btn gruen ${currentSk==='GRÜN'?'selected':''}" onclick="setPatientSK(${p.id}, 'GRÜN')"></span>
+            <span class="sk-btn blau ${currentSk==='BLAU'?'selected':''}" onclick="setPatientSK(${p.id}, 'BLAU')"></span>
+            <span class="sk-btn schwarz ${currentSk==='SCHWARZ'?'selected':''}" onclick="setPatientSK(${p.id}, 'SCHWARZ')"></span>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function setPatientSK(id, category) {
+    let savedSichtungen = JSON.parse(localStorage.getItem('manv_sichtungen') || "{}");
+    savedSichtungen[id] = category;
+    localStorage.setItem('manv_sichtungen', JSON.stringify(savedSichtungen));
+    renderAdminTable();
+    updateGesichtetOverview();
+  }
+
+  function updateGesichtetOverview() {
+    const container = document.getElementById('gesichtet-container');
+    let savedSichtungen = JSON.parse(localStorage.getItem('manv_sichtungen') || "{}");
+    let keys = Object.keys(savedSichtungen).map(Number).sort((a,b)=>a-b);
+
+    if (keys.length === 0) {
+      container.innerHTML = `<span style="font-size:0.8rem; color:#64748B; padding:5px;">Noch keine Patienten gesichtet.</span>`;
+      return;
+    }
+
+    container.innerHTML = "";
+    keys.forEach((id, index) => {
+      let p = patientsData.find(item => item.id === id);
+      let cat = savedSichtungen[id];
+      let assignedBadgeClass = getBadgeClass(cat);
+      let trueBadgeClass = getBadgeClass(p.trueCategory);
+
+      let card = document.createElement('div');
+      card.className = 'gesichtet-detail-card';
+      card.innerHTML = `
+        <div class="gesichtet-card-header">
+          <span>Sichtung Nr. ${index + 1} &bull; Patient ID: ${p.id} &bull; ${p.name}</span>
+          <span>
+            Vergeben: <span class="${assignedBadgeClass}"><b>${cat}</b></span> | 
+            Echt: <span class="${trueBadgeClass}"><b>${p.trueCategory}</b></span>
+          </span>
+        </div>
+        <div class="gesichtet-card-body">
+          <div><b>Alter/Geschlecht:</b> ${p.ageGender}</div>
+          <div><b>Gehfähig:</b> ${p.walkingAbility}</div>
+          <div><b>Ersteindruck:</b> ${p.impression}</div>
+          <div><b>Verletzungen:</b> ${p.visibleInjuries}</div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function renderTableSection(containerId, dataArray, prefix, targetRowCount) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    const totalRows = targetRowCount || dataArray.length;
+    for (let index = 0; index < totalRows; index++) {
+      const item = dataArray[index];
+      const rowId = `${prefix}-${index}`;
+      const tr = document.createElement('tr');
+      if (item) {
+        let labelContent = (prefix === 'abcde') ? `<span class="abcde-key">${item.letter}</span>${item.key}` : item.key;
+        tr.innerHTML = `
+          <td class="param-label">${labelContent}</td>
+          <td class="param-action">
+            <button class="btn-start" id="btn-${rowId}" onclick="runCountdown('${rowId}', 10)">Start</button>
+            <span class="timer-text" id="timer-${rowId}" style="display:none;">10s</span>
+          </td>
+          <td class="param-value">
+            <span id="val-${rowId}" class="hidden-val">---</span>
+            <span id="real-val-${rowId}" style="display:none;">${item.val}</span>
+          </td>
+        `;
+      } else {
+        tr.innerHTML = `<td class="param-label">&nbsp;</td><td class="param-action">&nbsp;</td><td class="param-value">&nbsp;</td>`;
+      }
+      container.appendChild(tr);
+    }
+  }
+
+  function loadPatientData(id) {
+    const p = patientsData.find(item => item.id === id);
+    if (!p) return;
+
+    document.getElementById('real-val-header-name').innerText = p.name;
+    document.getElementById('real-val-header-age-gender').innerText = p.ageGender;
+    document.getElementById('real-val-header-impression').innerText = p.impression;
+    document.getElementById('real-val-header-walking').innerText = p.walkingAbility;
+    document.getElementById('real-val-header-injuries').innerText = p.visibleInjuries;
+
+    p.markers.forEach(m => {
+      const container = document.getElementById(m.view === 'front' ? 'front-view' : 'back-view');
+      if (container) {
+        const markerEl = document.createElement('div');
+        markerEl.className = 'injury-marker';
+        markerEl.style.top = m.top;
+        markerEl.style.left = m.left;
+        markerEl.innerText = m.text;
+        container.appendChild(markerEl);
+      }
+    });
+
+    renderTableSection('table-abcde', p.abcde, 'abcde', 6);
+    renderTableSection('table-vitals', p.vitals, 'vitals', 11); // Erhöht auf 11 Zeilen wegen Hb
+    renderTableSection('table-sampler', p.sampler, 'sampler', 7);
+    renderTableSection('table-scores', p.scores, 'scores', 8);
+  }
+
+  function runCountdown(rowId, duration, onCompleteCallback) {
+    if (isTimerRunning) {
+      const alertBox = document.getElementById('global-alert');
+      alertBox.style.display = 'block';
+      setTimeout(() => alertBox.style.display = 'none', 3000);
+      return;
+    }
+    isTimerRunning = true;
+    const btn = document.getElementById(`btn-${rowId}`);
+    const timerDisplay = document.getElementById(`timer-${rowId}`);
+    const valDisplay = document.getElementById(`val-${rowId}`);
+    const realValEl = document.getElementById(`real-val-${rowId}`);
+
+    btn.style.display = 'none';
+    timerDisplay.style.display = 'inline';
+    let timeLeft = duration;
+    timerDisplay.innerText = `${timeLeft}s`;
+
+    const interval = setInterval(() => {
+      timeLeft--;
+      timerDisplay.innerText = `${timeLeft}s`;
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        timerDisplay.style.display = 'none';
+        if (valDisplay && realValEl) {
+          valDisplay.innerText = realValEl.innerText;
+          valDisplay.classList.remove('hidden-val');
         }
+        if (onCompleteCallback) onCompleteCallback();
+        isTimerRunning = false;
+      }
+    }, 1000);
+  }
 
-        const patientsData = generatePatients();
+  function revealBodyMarkers() {
+    document.querySelectorAll('.injury-marker').forEach(m => m.style.display = 'block');
+  }
+</script>
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const qrGrid = document.getElementById("qr-grid");
-            const tableBody = document.getElementById("instructor-table-body");
-
-            patientsData.forEach(p => {
-                const card = document.createElement("div");
-                card.className = "bg-white p-3 rounded-lg shadow border flex flex-col items-center justify-between text-center page-break";
-                card.innerHTML = `
-                    <div class="text-xs font-bold text-gray-500 mb-1">Patient #${p.id}</div>
-                    <div id="qrcode-${p.id}" class="my-2 flex justify-center"></div>
-                    <button onclick="openPatientModal(${p.id})" class="mt-2 text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 w-full no-print">Details öffnen</button>
-                `;
-                qrGrid.appendChild(card);
-
-                new QRCode(document.getElementById(`qrcode-${p.id}`), {
-                    text: baseUrl + p.id,
-                    width: 90,
-                    height: 90
-                });
-
-                const row = document.createElement("tr");
-                let badgeColor = "bg-gray-100 text-gray-800";
-                if(p.category === "ROT") badgeColor = "bg-red-100 text-red-800 font-bold";
-                if(p.category === "GELB") badgeColor = "bg-yellow-100 text-yellow-800 font-bold";
-                if(p.category === "GRÜN") badgeColor = "bg-green-100 text-green-800 font-bold";
-                if(p.category === "SCHWARZ") badgeColor = "bg-black text-white font-bold";
-
-                row.innerHTML = `
-                    <td class="px-3 py-2 whitespace-nowrap font-medium text-gray-900">${p.id}</td>
-                    <td class="px-3 py-2 whitespace-nowrap text-gray-700">${p.name}, ${p.age} J.</td>
-                    <td class="px-3 py-2 whitespace-nowrap"><span class="px-2 py-0.5 rounded text-xs ${badgeColor}">${p.category}</span></td>
-                    <td class="px-3 py-2 text-gray-600 max-w-xs truncate" title="${p.injury}">${p.injury}</td>
-                    <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-600">HF: ${p.hr}/min | SpO2: ${p.spo2}% | CO: ${p.co}% | Hb: ${p.hb} g/dl | RR: ${p.rr}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const patientId = urlParams.get('id');
-            if (patientId) {
-                const pId = parseInt(patientId);
-                if (pId >= 1 && pId <= 100) {
-                    openPatientModal(pId);
-                }
-            }
-        });
-
-        function openPatientModal(id) {
-            const p = patientsData.find(item => item.id === id);
-            if (!p) return;
-
-            document.getElementById("modal-id-badge").innerText = `Patient-ID: ${p.id}`;
-            document.getElementById("modal-name").innerText = p.name;
-            document.getElementById("modal-demographics").innerText = `${p.age} Jahre, ${p.gender}`;
-            document.getElementById("modal-injury").innerText = p.injury;
-            
-            let vitalsHtml = `
-                <div>Herzfrequenz: <strong>${p.hr} /min</strong></div>
-                <div>Sättigung (SpO2): <strong class="${p.spo2 < 85 ? 'text-red-600 animate-pulse' : ''}">${p.spo2}%</strong></div>
-                <div>Kohlenmonoxid (CO-Hb): <strong class="${p.co > 10 ? 'text-red-600' : ''}">${p.co}%</strong></div>
-                <div>Hämoglobin (Hb): <strong class="${p.hb < 10 ? 'text-red-600 font-bold' : ''}">${p.hb} g/dl</strong></div>
-                <div>Blutdruck (RR): <strong>${p.rr} mmHg</strong></div>
-            `;
-            document.getElementById("modal-vitals").innerHTML = vitalsHtml;
-
-            const triageEl = document.getElementById("modal-triage");
-            triageEl.innerText = p.category;
-            
-            const banner = document.getElementById("modal-category-banner");
-            banner.className = "absolute top-0 left-0 right-0 h-3";
-            if(p.category === "ROT") banner.classList.add("bg-red-600");
-            else if(p.category === "GELB") banner.classList.add("bg-yellow-500");
-            else if(p.category === "GRÜN") banner.classList.add("bg-green-600");
-            else if(p.category === "SCHWARZ") banner.classList.add("bg-black");
-
-            document.getElementById("patient-modal").classList.remove("hidden");
-        }
-
-        function closeModal() {
-            document.getElementById("patient-modal").classList.add("hidden");
-            if (window.history.replaceState) {
-                window.history.replaceState(null, '', window.location.pathname);
-            }
-        }
-    </script>
 </body>
 </html>
