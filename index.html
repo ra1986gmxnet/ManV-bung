@@ -220,7 +220,6 @@
     .sk-btn.schwarz { background: #000; }
     .sk-btn.selected { transform: scale(1.2); box-shadow: 0 0 5px rgba(0,0,0,0.8); border: 2px solid #fff; }
 
-    /* Formular für Benutzerverwaltung */
     .user-form-grid {
       display: flex;
       gap: 10px;
@@ -348,7 +347,6 @@
     </div>
   </div>
 
-  <!-- Benutzerverwaltung (Nur für den Haupt-Admin "Martin" sichtbar) -->
   <div id="user-management-section" class="admin-stats-box" style="display:none;">
     <h3>Benutzerverwaltung (Nur Haupt-Admin)</h3>
     <div class="user-form-grid">
@@ -368,9 +366,7 @@
           <th>Aktion</th>
         </tr>
       </thead>
-      <tbody id="admin-users-rows">
-        <!-- Wird dynamisch gefüllt -->
-      </tbody>
+      <tbody id="admin-users-rows"></tbody>
     </table>
   </div>
 
@@ -394,9 +390,7 @@
         <th>Teilnehmer Sichtung (mStart)</th>
       </tr>
     </thead>
-    <tbody id="admin-patient-rows">
-      <!-- Wird dynamisch gefüllt -->
-    </tbody>
+    <tbody id="admin-patient-rows"></tbody>
   </table>
 </div>
 
@@ -546,16 +540,16 @@
   const germanFirstnamesM = ["Lukas", "Leon", "Finn", "Paul", "Jonas", "Felix", "Maximilian", "Henry", "Noah", "Elias", "Ben", "Luca", "David", "Alexander", "Philipp", "Niklas", "Tim", "Jan", "Tobias", "Florian"];
   const germanFirstnamesF = ["Emma", "Mia", "Sophia", "Hannah", "Emilia", "Anna", "Lina", "Marie", "Mila", "Lea", "Clara", "Nele", "Johanna", "Laura", "Sarah", "Julia", "Katharina", "Christina", "Stefanie"];
   const internationalNames = [
-    { name: "van Dijk, Jan", lang: "Niederländisch", gender: "m" },
-    { name: "Smith, Oliver", lang: "Englisch", gender: "m" },
-    { name: "Dubois, Camille", lang: "Französisch", gender: "f" },
-    { name: "Jensen, Lars", lang: "Dänisch", gender: "m" },
-    { name: "Shevchenko, Olena", lang: "Ukrainisch", gender: "f" },
-    { name: "Al-Mansoor, Tariq", lang: "Arabisch", gender: "m" },
-    { name: "Ivanov, Dmitry", lang: "Russisch", gender: "m" },
-    { name: "Rossi, Matteo", lang: "Italienisch", gender: "m" },
-    { name: "Garcia, Sofia", lang: "Spanisch", gender: "f" },
-    { name: "Silva, Joao", lang: "Portugiesisch", gender: "m" }
+    { name: "van Dijk, Jan", gender: "m" },
+    { name: "Smith, Oliver", gender: "m" },
+    { name: "Dubois, Camille", gender: "f" },
+    { name: "Jensen, Lars", gender: "m" },
+    { name: "Shevchenko, Olena", gender: "f" },
+    { name: "Al-Mansoor, Tariq", gender: "m" },
+    { name: "Ivanov, Dmitry", gender: "m" },
+    { name: "Rossi, Matteo", gender: "m" },
+    { name: "Garcia, Sofia", gender: "f" },
+    { name: "Silva, Joao", gender: "m" }
   ];
 
   const adultRiskPool = ["Keine bekannt", "Nikotinabusus", "Chronischer Alkoholabusus", "Mangelernährung / Untergewicht", "Diabetes Mellitus Typ 2", "Z.n. Herzinfarkt", "Arterielle Hypertonie", "Asthma bronchiale", "Adipositas"];
@@ -586,60 +580,80 @@
     return `ca. ${exactAge} Jahre`;
   }
 
+  function formatGCSDetail(e, v, m) {
+    let eText = e === 4 ? "Spontan (4 P.)" : e === 3 ? "Bei Ansprache (3 P.)" : e === 2 ? "Bei Schmerzreiz (2 P.)" : "Kein Öffnen der Augen (1 P.)";
+    let vText = v === 5 ? "Konversationsfähig, orientiert (5 P.)" : v === 4 ? "Konversationsfähig, desorientiert (4 P.)" : v === 3 ? "Einzelworte/Wortsalat (3 P.)" : v === 2 ? "Sinnlose Laute (2 P.)" : "Keine verbale Antwort (1 P.)";
+    let mText = m === 6 ? "Bei Aufforderung (6 P.)" : m === 5 ? "Gezielte Bewegung bei Schmerzreiz (5 P.)" : m === 4 ? "Ungezielte Bewegung auf Schmerzreiz (4 P.)" : m === 3 ? "Beugesynergismen (3 P.)" : m === 2 ? "Strecksynergismen (2 P.)" : "Keine motorische Reaktion (1 P.)";
+    let total = e + v + m;
+    return `Gesamt: ${total} P. (Augen: ${eText}, Verbal: ${vText}, Motorisch: ${mText})`;
+  }
+
   function getExplosionInjuryData(index, category, isChild, isUnderTwo, ageInYears) {
     let walking = "", abcdeB = "", abcdeC = "", abcdeD = "", abcdeE = "", samplerSymptom = "";
-    let p = "80 bpm", rr = "120/80 mmHg", af = "16 / min", spo2 = "98 %", rekap = "< 2 sek (vital stabil)";
-    let bz = "95 mg/dl", temp = "36.6 °C", etco2 = "38 mmHg", co = "< 2 %", spmet = "< 1.5 %";
-    let gcsE = 4, gcsV = 5, gcsM = 6, news = 0, qsofa = "0 Punkte", x = "Keine";
-    let befast = "Unauffällig (0 Pkt)", nexus = "Unauffällig (Kein HWS-Schmerz)", wells = "Unauffällig (< 2 Pkt)", spesi = "Niedriges Risiko (0 Pkt)", apgar = isUnderTwo ? "9 Punkte (Normal)" : "N/A (Nicht anwendbar)";
-    let gcsDetail = "E4 V5 M6 (Gesamt: 15 P.)";
+    let p = "Puls: 80 bpm", rr = "RR: 120/80 mmHg", af = "AF: 16 / min", spo2 = "SpO2: 98 %", rekap = "ReKap: < 2 sek (vital stabil)";
+    let bz = "BZ: 95 mg/dl", temp = "Temp: 36.6 °C", etco2 = "etCO2: 38 mmHg", co = "CO: < 2 %", spmet = "SpMet: < 1.5 %";
+    let gcsE = 4, gcsV = 5, gcsM = 6, newsVal = 0, qsofaVal = 0, x = "Keine";
+    let befast = "BE-FAST: Unauffällig (0 Pkt - Keine Anzeichen für Schlaganfall / Hirndruck)", 
+        nexus = "NEXUS: Unauffällig (0 Pkt - Kein HWS-Schmerz, keine neurologischen Ausfälle, uneingeschränkt wach)", 
+        wells = "Wells-Score: Unauffällig (< 2 Pkt - Geringes Risiko für tiefe Venenthrombose / Lungenembolie)", 
+        spesi = "sPESI: Niedriges Risiko (0 Pkt - Keine kardiorespiratorische Dekompensation zu erwarten)", 
+        apgar = isUnderTwo ? "APGAR-Schema: 9 Punkte (Normal - Atmung, Herzschlag und Hautfarbe altersgerecht stabil)" : "APGAR-Schema: N/A (Nicht anwendbar - Patient ist kein Neugeborenes)";
 
     if (category === "GRÜN") {
       walking = (ageInYears < 2.0) ? "Nein" : "Ja";
       const greenTypes = [
-        { imp: "Wach, orientiert, klagt über Schmerzen an der Stirn.", inj: "Blutende Risswunde Stirn rechts.", markers: [{view:"front", top:"15%", left:"55%", text:"Risswunde"}], b:"Frei", c:"Kräftig", d:"GCS 15", e:"Unauffällig", sym:"Schmerzen", p:"88 bpm", rr:"125/80 mmHg", af:"18 / min", spo2:"98 %", rekap:"< 2 sek (vital stabil)", news:0 },
-        { imp: "Aufgeregt, hält sich die Hand ans Ohr, Tinnitus.", inj: "Keine äußeren Wunden erkennbar.", markers: [{view:"front", top:"18%", left:"30%", text:"Ohrschmerz"}], b:"Frei", c:"Normal", d:"GCS 15", e:"Keine", sym:"Tinnitus", p:"96 bpm", rr:"130/85 mmHg", af:"20 / min", spo2:"99 %", rekap:"< 2 sek (vital stabil)", news:1 },
-        { imp: "Hustet leicht, Gesicht leicht verschmutzt.", inj: "Rußanhaftungen im Gesicht.", markers: [{view:"front", top:"18%", left:"50%", text:"Ruß"}], b:"Husten", c:"Stabil", d:"GCS 15", e:"Intakt", sym:"Hustenreiz", p:"82 bpm", rr:"120/75 mmHg", af:"16 / min", spo2:"97 %", rekap:"< 2 sek (vital stabil)", news:0 },
-        { imp: "Schont das rechte Bein, humpelt.", inj: "Schwellung am Sprunggelenk.", markers: [{view:"front", top:"85%", left:"60%", text:"Schwellung"}], b:"Frei", c:"Stabil", d:"GCS 15", e:"Lokal", sym:"Schmerz", p:"90 bpm", rr:"115/75 mmHg", af:"18 / min", spo2:"99 %", rekap:"< 2 sek (vital stabil)", news:0 },
-        { imp: "Flacher Atem, Schmerzen bei der Atmung.", inj: "Thoraxprellung links.", markers: [{view:"front", top:"42%", left:"35%", text:"Prellung"}], b:"Schmerzhaft", c:"Regulär", d:"GCS 15", e:"Intakt", sym:"Thoraxschmerz", p:"92 bpm", rr:"135/85 mmHg", af:"19 / min", spo2:"98 %", rekap:"< 2 sek (vital stabil)", news:1 },
-        { imp: "Klagt über dumpfe Kopfschmerzen.", inj: "Hämatom am Hinterkopf.", markers: [{view:"back", top:"15%", left:"50%", text:"Hämatom"}], b:"Frei", c:"Stabil", d:"GCS 15", e:"Keine", sym:"Kopfschmerz", p:"84 bpm", rr:"125/80 mmHg", af:"16 / min", spo2:"99 %", rekap:"< 2 sek (vital stabil)", news:0 },
-        { imp: "Unruhig, berichtet über Hitzegefühl.", inj: "Rötung am Unterarm.", markers: [{view:"front", top:"52%", left:"80%", text:"Erythem"}], b:"Frei", c:"Tachykard", d:"GCS 15", e:"Erythem", sym:"Brennen", p:"104 bpm", rr:"140/90 mmHg", af:"22 / min", spo2:"98 %", rekap:"< 2 sek (vital stabil)", news:2 }
+        { imp: "Wach, orientiert, klagt über Schmerzen an der Stirn.", inj: "Blutende Risswunde Stirn rechts.", markers: [{view:"front", top:"15%", left:"55%", text:"Risswunde"}], b:"Frei", c:"Kräftig", d:"GCS 15", e:"Unauffällig", sym:"Schmerzen", p:"Puls: 88 bpm", rr:"RR: 125/80 mmHg", af:"AF: 18 / min", spo2:"SpO2: 98 %", rekap:"ReKap: < 2 sek (vital stabil)", news:0, e:4, v:5, m:6 },
+        { imp: "Aufgeregt, hält sich die Hand ans Ohr, Tinnitus.", inj: "Keine äußeren Wunden erkennbar.", markers: [{view:"front", top:"18%", left:"30%", text:"Ohrschmerz"}], b:"Frei", c:"Normal", d:"GCS 15", e:"Keine", sym:"Tinnitus", p:"Puls: 96 bpm", rr:"RR: 130/85 mmHg", af:"AF: 20 / min", spo2:"SpO2: 99 %", rekap:"ReKap: < 2 sek (vital stabil)", news:1, e:4, v:5, m:6 },
+        { imp: "Hustet leicht, Gesicht leicht verschmutzt.", inj: "Rußanhaftungen im Gesicht.", markers: [{view:"front", top:"18%", left:"50%", text:"Ruß"}], b:"Husten", c:"Stabil", d:"GCS 15", e:"Intakt", sym:"Hustenreiz", p:"Puls: 82 bpm", rr:"RR: 120/75 mmHg", af:"AF: 16 / min", spo2:"SpO2: 97 %", rekap:"ReKap: < 2 sek (vital stabil)", news:0, e:4, v:5, m:6 },
+        { imp: "Schont das rechte Bein, humpelt.", inj: "Schwellung am Sprunggelenk.", markers: [{view:"front", top:"85%", left:"60%", text:"Schwellung"}], b:"Frei", c:"Stabil", d:"GCS 15", e:"Lokal", sym:"Schmerz", p:"Puls: 90 bpm", rr:"RR: 115/75 mmHg", af:"AF: 18 / min", spo2:"SpO2: 99 %", rekap:"ReKap: < 2 sek (vital stabil)", news:0, e:4, v:5, m:6 },
+        { imp: "Flacher Atem, Schmerzen bei der Atmung.", inj: "Thoraxprellung links.", markers: [{view:"front", top:"42%", left:"35%", text:"Prellung"}], b:"Schmerzhaft", c:"Regulär", d:"GCS 15", e:"Intakt", sym:"Thoraxschmerz", p:"Puls: 92 bpm", rr:"RR: 135/85 mmHg", af:"AF: 19 / min", spo2:"SpO2: 98 %", rekap:"ReKap: < 2 sek (vital stabil)", news:1, e:4, v:5, m:6 },
+        { imp: "Klagt über dumpfe Kopfschmerzen.", inj: "Hämatom am Hinterkopf.", markers: [{view:"back", top:"15%", left:"50%", text:"Hämatom"}], b:"Frei", c:"Stabil", d:"GCS 15", e:"Keine", sym:"Kopfschmerz", p:"Puls: 84 bpm", rr:"RR: 125/80 mmHg", af:"AF: 16 / min", spo2:"SpO2: 99 %", rekap:"ReKap: < 2 sek (vital stabil)", news:0, e:4, v:5, m:6 },
+        { imp: "Unruhig, berichtet über Hitzegefühl.", inj: "Rötung am Unterarm.", markers: [{view:"front", top:"52%", left:"80%", text:"Erythem"}], b:"Frei", c:"Tachykard", d:"GCS 15", e:"Erythem", sym:"Brennen", p:"Puls: 104 bpm", rr:"RR: 140/90 mmHg", af:"AF: 22 / min", spo2:"SpO2: 98 %", rekap:"ReKap: < 2 sek (vital stabil)", news:2, e:4, v:5, m:6 }
       ];
       let sel = greenTypes[(index * 7) % greenTypes.length];
-      return { imp: sel.imp, walk: walking, inj: sel.inj, markers: sel.markers, b: sel.b, c: sel.c, d: sel.d, e: sel.e, sym: sel.sym, p: sel.p, rr: sel.rr, af: sel.af, spo2: sel.spo2, rekap: sel.rekap, bz:"102 mg/dl", temp:"36.8 °C", etco2:"37 mmHg", co:"< 2 %", spmet:"< 1.0 %", gcsE:4, gcsV:5, gcsM:6, gcsTotal:15, gcsDetail:"E4 V5 M6 (Gesamt: 15 P.)", news:sel.news, qsofa:"0 Punkte", x:"Keine", befast, nexus, wells, spesi, apgar };
+      let gcsStr = formatGCSDetail(sel.e, sel.v, sel.m);
+      let newsStr = isChild ? "N/A (Nur für Erwachsene)" : `NEWS2-Score: ${sel.news} Punkte (Geringes akutes Risiko, normale Überwachung)`;
+      let qsofaStr = isChild ? "N/A (Nur für Erwachsene)" : "qSOFA-Score: 0 Punkte (Keine Organversagen-Indikation)";
+      return { imp: sel.imp, walk: walking, inj: sel.inj, markers: sel.markers, b: sel.b, c: sel.c, d: sel.d, e: sel.e, sym: sel.sym, p: sel.p, rr: sel.rr, af: sel.af, spo2: sel.spo2, rekap: sel.rekap, bz:"BZ: 102 mg/dl", temp:"Temp: 36.8 °C", etco2:"etCO2: 37 mmHg", co:"CO: < 2 %", spmet:"SpMet: < 1.0 %", gcsDetail: gcsStr, news: newsStr, qsofa: qsofaStr, x:"Keine", befast, nexus, wells, spesi, apgar };
     } else if (category === "GELB") {
       walking = "Nein";
       const yellowTypes = [
-        { imp: "Wach, starke Schmerzen, eingeschränkte Beweglichkeit.", inj: "Fehlstellung Unterschenkel li.", markers: [{view:"front", top:"78%", left:"40%", text:"Fehlstellung"}], b:"Frei", c:"Kräftig", d:"GCS 15", e:"Hämatom", sym:"Dauerschmerz", p:"108 bpm", rr:"145/95 mmHg", af:"22 / min", spo2:"96 %", rekap:"< 2 sek (vital stabil)", news:3 },
-        { imp: "Atemfrequenz erhöht, Ruß im Mund- und Nasenbereich.", inj: "Verbrennungen im Gesicht.", markers: [{view:"front", top:"22%", left:"50%", text:"Verbrennung"}], b:"Rasselgeräusche", c:"Stabil", d:"GCS 15", e:"Blasen", sym:"Luftnot", p:"112 bpm", rr:"130/85 mmHg", af:"26 / min", spo2:"93 %", rekap:"< 2 sek (vital stabil)", news:4 },
-        { imp: "Verlangsamt, reagiert verzögert auf Ansprache.", inj: "Platzwunde Hinterkopf.", markers: [{view:"back", top:"14%", left:"50%", text:"Platzwunde"}], b:"Frei", c:"Hyperton", d:"GCS 13", e:"Blutung", sym:"Schwindel", p:"76 bpm", rr:"150/95 mmHg", af:"15 / min", spo2:"98 %", rekap:"< 2 sek (vital stabil)", news:2 },
-        { imp: "Schont die rechte Schulter, Fehlhaltung.", inj: "Schulterdeformität re.", markers: [{view:"front", top:"38%", left:"75%", text:"Deformität"}], b:"Frei", c:"Normal", d:"GCS 15", e:"Lokal", sym:"Schmerz", p:"98 bpm", rr:"135/85 mmHg", af:"18 / min", spo2:"98 %", rekap:"< 2 sek (vital stabil)", news:1 },
-        { imp: "Deutliche Atemnot, Schmerzen beim Einatmen.", inj: "Verletzung des Brustkorbs.", markers: [{view:"front", top:"42%", left:"32%", text:"Thoraxtrauma"}], b:"Eingeschränkt", c:"Tachykard", d:"GCS 15", e:"Druckschmerz", sym:"Schmerz", p:"115 bpm", rr:"140/90 mmHg", af:"28 / min", spo2:"92 %", rekap:"< 2 sek (vital stabil)", news:5 },
-        { imp: "Große Hämatome an den Extremitäten.", inj: "Weichteilblutung Oberschenkel.", markers: [{view:"front", top:"65%", left:"40%", text:"Ödem"}], b:"Frei", c:"Stabil", d:"GCS 15", e:"Ödeme", sym:"Schmerz", p:"102 bpm", rr:"125/80 mmHg", af:"20 / min", spo2:"97 %", rekap:"< 2 sek (vital stabil)", news:2 }
+        { imp: "Wach, starke Schmerzen, eingeschränkte Beweglichkeit.", inj: "Fehlstellung Unterschenkel li.", markers: [{view:"front", top:"78%", left:"40%", text:"Fehlstellung"}], b:"Frei", c:"Kräftig", d:"GCS 15", e:"Hämatom", sym:"Dauerschmerz", p:"Puls: 108 bpm", rr:"RR: 145/95 mmHg", af:"AF: 22 / min", spo2:"SpO2: 96 %", rekap:"ReKap: < 2 sek (vital stabil)", news:3, e:4, v:5, m:6 },
+        { imp: "Atemfrequenz erhöht, Ruß im Mund- und Nasenbereich.", inj: "Verbrennungen im Gesicht.", markers: [{view:"front", top:"22%", left:"50%", text:"Verbrennung"}], b:"Rasselgeräusche", c:"Stabil", d:"GCS 15", e:"Blasen", sym:"Luftnot", p:"Puls: 112 bpm", rr:"RR: 130/85 mmHg", af:"AF: 26 / min", spo2:"SpO2: 93 %", rekap:"ReKap: < 2 sek (vital stabil)", news:4, e:4, v:5, m:6 },
+        { imp: "Verlangsamt, reagiert verzögert auf Ansprache.", inj: "Platzwunde Hinterkopf.", markers: [{view:"back", top:"14%", left:"50%", text:"Platzwunde"}], b:"Frei", c:"Hyperton", d:"GCS 13", e:"Blutung", sym:"Schwindel", p:"Puls: 76 bpm", rr:"RR: 150/95 mmHg", af:"AF: 15 / min", spo2:"SpO2: 98 %", rekap:"ReKap: < 2 sek (vital stabil)", news:2, e:3, v:4, m:6 },
+        { imp: "Schont die rechte Schulter, Fehlhaltung.", inj: "Schulterdeformität re.", markers: [{view:"front", top:"38%", left:"75%", text:"Deformität"}], b:"Frei", c:"Normal", d:"GCS 15", e:"Lokal", sym:"Schmerz", p:"Puls: 98 bpm", rr:"RR: 135/85 mmHg", af:"AF: 18 / min", spo2:"SpO2: 98 %", rekap:"ReKap: < 2 sek (vital stabil)", news:1, e:4, v:5, m:6 },
+        { imp: "Deutliche Atemnot, Schmerzen beim Einatmen.", inj: "Verletzung des Brustkorbs.", markers: [{view:"front", top:"42%", left:"32%", text:"Thoraxtrauma"}], b:"Eingeschränkt", c:"Tachykard", d:"GCS 15", e:"Druckschmerz", sym:"Schmerz", p:"Puls: 115 bpm", rr:"RR: 140/90 mmHg", af:"AF: 28 / min", spo2:"SpO2: 92 %", rekap:"ReKap: < 2 sek (vital stabil)", news:5, e:4, v:5, m:6 },
+        { imp: "Große Hämatome an den Extremitäten.", inj: "Weichteilblutung Oberschenkel.", markers: [{view:"front", top:"65%", left:"40%", text:"Ödem"}], b:"Frei", c:"Stabil", d:"GCS 15", e:"Ödeme", sym:"Schmerz", p:"Puls: 102 bpm", rr:"RR: 125/80 mmHg", af:"AF: 20 / min", spo2:"SpO2: 97 %", rekap:"ReKap: < 2 sek (vital stabil)", news:2, e:4, v:5, m:6 }
       ];
       let sel = yellowTypes[(index * 5) % yellowTypes.length];
-      let gcsTot = sel.d.includes("13") ? 13 : 15;
-      let gcsDet = sel.d.includes("13") ? "E3 V4 M6 (Gesamt: 13 P.)" : "E4 V5 M6 (Gesamt: 15 P.)";
-      return { imp: sel.imp, walk: walking, inj: sel.inj, markers: sel.markers, b: sel.b, c: sel.c, d: sel.d, e: sel.e, sym: sel.sym, p: sel.p, rr: sel.rr, af: sel.af, spo2: sel.spo2, rekap: sel.rekap, bz:"110 mg/dl", temp:"36.5 °C", etco2:"35 mmHg", co:"< 3 %", spmet:"< 1.5 %", gcsE:sel.d.includes("13")?3:4, gcsV:sel.d.includes("13")?4:5, gcsM:6, gcsTotal:gcsTot, gcsDetail:gcsDet, news:sel.news, qsofa:"0 Punkte", x:"Keine", befast, nexus, wells, spesi, apgar };
+      let gcsStr = formatGCSDetail(sel.e, sel.v, sel.m);
+      let newsStr = isChild ? "N/A (Nur für Erwachsene)" : `NEWS2-Score: ${sel.news} Punkte (Mittleres Risiko oder Einzelparameter-Auffälligkeit)`;
+      let qsofaStr = isChild ? "N/A (Nur für Erwachsene)" : "qSOFA-Score: 0 Punkte (Keine akute Sepsis-Kriterien erfüllt)";
+      return { imp: sel.imp, walk: walking, inj: sel.inj, markers: sel.markers, b: sel.b, c: sel.c, d: sel.d, e: sel.e, sym: sel.sym, p: sel.p, rr: sel.rr, af: sel.af, spo2: sel.spo2, rekap: sel.rekap, bz:"BZ: 110 mg/dl", temp:"Temp: 36.5 °C", etco2:"etCO2: 35 mmHg", co:"CO: < 3 %", spmet:"SpMet: < 1.5 %", gcsDetail: gcsStr, news: newsStr, qsofa: qsofaStr, x:"Keine", befast, nexus, wells, spesi, apgar };
     } else if (category === "ROT") {
       walking = "Nein";
       const redTypes = [
-        { imp: "Apathisch, blass, Kreislaufzeichen unzureichend.", inj: "Arterielle Blutung Oberschenkel.", markers: [{view:"front", top:"65%", left:"65%", text:"Arterielle Blutung"}], x:"Aktive Blutung", b:"Tachypnoe", c:"Schwach", d:"GCS 10", e:"Hypothermie", sym:"Verwirrt", p:"148 bpm", rr:"70/40 mmHg", af:"34 / min", spo2:"84 %", rekap:"> 2 sek (instabil / gefährdet)", news:12, eVal:2, vVal:3, mVal:5, gcsTot:10 },
-        { imp: "Akute Atemnot, Einziehungen, Zyanose.", inj: "Inhalationstrauma.", markers: [{view:"front", top:"18%", left:"50%", text:"Inhalation"}], x:"Keine", b:"Stridor", c:"Hyperton", d:"GCS 11", e:"Verbrennung", sym:"Luftnot", p:"135 bpm", rr:"160/100 mmHg", af:"38 / min", spo2:"78 %", rekap:"< 2 sek (vital stabil)", news:10, eVal:3, vVal:3, mVal:5, gcsTot:11 },
-        { imp: "Bewusstlos, unregelmäßige Atmung.", inj: "Schweres Schädel-Hirn-Trauma.", markers: [{view:"front", top:"14%", left:"50%", text:"SHT"}], x:"Keine", b:"Ineffektiv", c:"Bradykard", d:"GCS 6", e:"Neurologisch", sym:"Keine", p:"52 bpm", rr:"180/110 mmHg", af:"8 / min", spo2:"82 %", rekap:"> 2 sek (instabil / gefährdet)", news:11, eVal:1, vVal:2, mVal:3, gcsTot:6 },
-        { imp: "Massives Thoraxtrauma, instabezirkliche Brustwandbewegung.", inj: "Schweres stumpfes Thoraxtrauma.", markers: [{view:"front", top:"42%", left:"32%", text:"Thoraxtrauma"}], x:"Keine", b:"Asymmetrisch", c:"Filiform", d:"GCS 9", e:"Deformiert", sym:"Extreme Luftnot", p:"155 bpm", rr:"80/50 mmHg", af:"42 / min", spo2:"75 %", rekap:"> 2 sek (instabil / gefährdet)", news:14, eVal:2, vVal:2, mVal:5, gcsTot:9 },
-        { imp: "Traumatische Amputation, starker Blutverlust.", inj: "Amputation Unterschenkel li.", markers: [{view:"front", top:"78%", left:"40%", text:"Amputation"}], x:"Blutung Stumpf", b:"Tachypnoe", c:"Schock", d:"GCS 12", e:"Kritisch", sym:"Schmerz", p:"140 bpm", rr:"85/55 mmHg", af:"30 / min", spo2:"88 %", rekap:"> 2 sek (instabil / gefährdet)", news:9, eVal:3, vVal:3, mVal:6, gcsTot:12 },
-        { imp: "Großflächige Verbrennungen, Kreislauf instabil.", inj: "Verbrennungen 45% KOF.", markers: [{view:"front", top:"45%", left:"50%", text:"Verbrennung"}], x:"Keine", b:"Beschleunigt", c:"Schwach", d:"GCS 10", e:"Verbrannt", sym:"Apathie", p:"142 bpm", rr:"75/50 mmHg", af:"32 / min", spo2:"85 %", rekap:"> 2 sek (instabil / gefährdet)", news:12, eVal:2, vVal:3, mVal:5, gcsTot:10 }
+        { imp: "Apathisch, blass, Kreislaufzeichen unzureichend.", inj: "Arterielle Blutung Oberschenkel.", markers: [{view:"front", top:"65%", left:"65%", text:"Arterielle Blutung"}], x:"Aktive Blutung", b:"Tachypnoe", c:"Schwach", d:"GCS 10", e:"Hypothermie", sym:"Verwirrt", p:"Puls: 148 bpm", rr:"RR: 70/40 mmHg", af:"AF: 34 / min", spo2:"SpO2: 84 %", rekap:"ReKap: > 2 sek (instabil / gefährdet)", news:12, eVal:2, vVal:3, mVal:5 },
+        { imp: "Akute Atemnot, Einziehungen, Zyanose.", inj: "Inhalationstrauma.", markers: [{view:"front", top:"18%", left:"50%", text:"Inhalation"}], x:"Keine", b:"Stridor", c:"Hyperton", d:"GCS 11", e:"Verbrennung", sym:"Luftnot", p:"Puls: 135 bpm", rr:"RR: 160/100 mmHg", af:"AF: 38 / min", spo2:"SpO2: 78 %", rekap:"ReKap: < 2 sek (vital stabil)", news:10, eVal:3, vVal:3, mVal:5 },
+        { imp: "Bewusstlos, unregelmäßige Atmung.", inj: "Schweres Schädel-Hirn-Trauma.", markers: [{view:"front", top:"14%", left:"50%", text:"SHT"}], x:"Keine", b:"Ineffektiv", c:"Bradykard", d:"GCS 6", e:"Neurologisch", sym:"Keine", p:"Puls: 52 bpm", rr:"RR: 180/110 mmHg", af:"AF: 8 / min", spo2:"SpO2: 82 %", rekap:"ReKap: > 2 sek (instabil / gefährdet)", news:11, eVal:1, vVal:2, mVal:3 },
+        { imp: "Massives Thoraxtrauma, instabezirkliche Brustwandbewegung.", inj: "Schweres stumpfes Thoraxtrauma.", markers: [{view:"front", top:"42%", left:"32%", text:"Thoraxtrauma"}], x:"Keine", b:"Asymmetrisch", c:"Filiform", d:"GCS 9", e:"Deformiert", sym:"Extreme Luftnot", p:"Puls: 155 bpm", rr:"RR: 80/50 mmHg", af:"AF: 42 / min", spo2:"SpO2: 75 %", rekap:"ReKap: > 2 sek (instabil / gefährdet)", news:14, eVal:2, vVal:2, mVal:5 },
+        { imp: "Traumatische Amputation, starker Blutverlust.", inj: "Amputation Unterschenkel li.", markers: [{view:"front", top:"78%", left:"40%", text:"Amputation"}], x:"Blutung Stumpf", b:"Tachypnoe", c:"Schock", d:"GCS 12", e:"Kritisch", sym:"Schmerz", p:"Puls: 140 bpm", rr:"RR: 85/55 mmHg", af:"AF: 30 / min", spo2:"SpO2: 88 %", rekap:"ReKap: > 2 sek (instabil / gefährdet)", news:9, eVal:3, vVal:3, mVal:6 },
+        { imp: "Großflächige Verbrennungen, Kreislauf instabil.", inj: "Verbrennungen 45% KOF.", markers: [{view:"front", top:"45%", left:"50%", text:"Verbrennung"}], x:"Keine", b:"Beschleunigt", c:"Schwach", d:"GCS 10", e:"Verbrannt", sym:"Apathie", p:"Puls: 142 bpm", rr:"RR: 75/50 mmHg", af:"AF: 32 / min", spo2:"SpO2: 85 %", rekap:"ReKap: > 2 sek (instabil / gefährdet)", news:12, eVal:2, vVal:3, mVal:5 }
       ];
       let sel = redTypes[(index * 3) % redTypes.length];
-      let isCO = sel.inj.includes("Inhalation") ? "18 % (Erhöht)" : "< 2 %";
-      return { imp: sel.imp, walk: walking, inj: sel.inj, markers: sel.markers, b: sel.b, c: sel.c, d: sel.d, e: sel.e, sym: sel.sym, p: sel.p, rr: sel.rr, af: sel.af, spo2: sel.spo2, rekap: sel.rekap, bz:"145 mg/dl", temp:"35.2 °C (Hypothermie)", etco2:"24 mmHg", co:isCO, spmet:"< 1.5 %", gcsE:sel.eVal, gcsV:sel.vVal, gcsM:sel.mVal, gcsTotal:sel.gcsTot, gcsDetail:`E${sel.eVal} V${sel.vVal} M${sel.mVal} (Gesamt: ${sel.gcsTot} P.)`, news:sel.news, qsofa:"2 Punkte", x:sel.x, befast, nexus, wells, spesi, apgar };
+      let isCO = sel.inj.includes("Inhalation") ? "CO: 18 % (Erhöht)" : "CO: < 2 %";
+      let gcsStr = formatGCSDetail(sel.eVal, sel.vVal, sel.mVal);
+      let newsStr = isChild ? "N/A (Nur für Erwachsene)" : `NEWS2-Score: ${sel.news} Punkte (Kritischer Bereich >= 7, hoher Alarm)`;
+      let qsofaStr = isChild ? "N/A (Nur für Erwachsene)" : "qSOFA-Score: 2 Punkte (Hohes Risiko für schlechten klinischen Verlauf / Sepsis-Verdacht)";
+      return { imp: sel.imp, walk: walking, inj: sel.inj, markers: sel.markers, b: sel.b, c: sel.c, d: sel.d, e: sel.e, sym: sel.sym, p: sel.p, rr: sel.rr, af: sel.af, spo2: sel.spo2, rekap: sel.rekap, bz:"BZ: 145 mg/dl", temp:"Temp: 35.2 °C (Hypothermie)", etco2:"etCO2: 24 mmHg", co:isCO, spmet:"SpMet: < 1.5 %", gcsDetail: gcsStr, news: newsStr, qsofa: qsofaStr, x:sel.x, befast, nexus, wells, spesi, apgar };
     } else if (category === "SCHWARZ") {
       walking = "Nein";
-      return { imp: "Reglos, keine Spontanatmung, keine Lebenszeichen.", walk: walking, inj: "Letales Schädel-Hirn-Trauma.", markers: [{view:"front", top:"14%", left:"50%", text:"Letal"}], b:"Keine", c:"Kein Puls", d:"GCS 3", e:"Letal", sym:"Keine", p:"0 bpm", rr:"0/0 mmHg", af:"0 / min", spo2:"0 %", rekap:"> 3 sek (Kein Kreislauf)", bz:"0 mg/dl", temp:"32.0 °C", etco2:"0 mmHg", co:"N/A", spmet:"N/A", gcsE:1, gcsV:1, gcsM:1, gcsTotal:3, gcsDetail:"E1 V1 M1 (Gesamt: 3 P.)", news:"N/A", qsofa:"3 Punkte", x:"Keine", befast, nexus, wells, spesi, apgar };
+      let gcsStr = formatGCSDetail(1, 1, 1);
+      return { imp: "Reglos, keine Spontanatmung, keine Lebenszeichen.", walk: walking, inj: "Letales Schädel-Hirn-Trauma.", markers: [{view:"front", top:"14%", left:"50%", text:"Letal"}], b:"Keine", c:"Kein Puls", d:"GCS 3", e:"Letal", sym:"Keine", p:"Puls: 0 bpm", rr:"RR: 0/0 mmHg", af:"AF: 0 / min", spo2:"SpO2: 0 %", rekap:"ReKap: > 3 sek (Kein Kreislauf)", bz:"BZ: 0 mg/dl", temp:"Temp: 32.0 °C", etco2:"etCO2: 0 mmHg", co:"CO: N/A", spmet:"SpMet: N/A", gcsDetail: gcsStr, news: "NEWS2-Score: N/A (Reanimation / Exitus)", qsofa: "qSOFA-Score: 3 Punkte (Maximaler Score)", x:"Keine", befast, nexus, wells, spesi, apgar };
     } else {
       walking = "Nein";
-      return { imp: "Schwere letale Verletzungen, keine Überlebenschance.", inj: "95% Verbrennungen.", markers: [{view:"front", top:"45%", left:"50%", text:"Verkohlung"}], b:"Schnappatmung", c:"Extrem schwach", d:"GCS 4", e:"Verkohlt", sym:"Keine", p:"45 bpm", rr:"50/20 mmHg", af:"6 / min", spo2:"50 %", rekap:"> 3 sek (Extrem instabil)", bz:"60 mg/dl", temp:"33.5 °C", etco2:"15 mmHg", co:"25 %", spmet:"< 2.0 %", gcsE:1, gcsV:1, gcsM:2, gcsTotal:4, gcsDetail:"E1 V1 M2 (Gesamt: 4 P.)", news:"3 Punkte", qsofa:"3 Punkte", x:"Keine", befast, nexus, wells, spesi, apgar };
+      let gcsStr = formatGCSDetail(1, 1, 2);
+      return { imp: "Schwere letale Verletzungen, keine Überlebenschance.", inj: "95% Verbrennungen.", markers: [{view:"front", top:"45%", left:"50%", text:"Verkohlung"}], b:"Schnappatmung", c:"Extrem schwach", d:"GCS 4", e:"Verkohlt", sym:"Keine", p:"Puls: 45 bpm", rr:"RR: 50/20 mmHg", af:"AF: 6 / min", spo2:"SpO2: 50 %", rekap:"ReKap: > 3 sek (Extrem instabil)", bz:"BZ: 60 mg/dl", temp:"Temp: 33.5 °C", etco2:"etCO2: 15 mmHg", co:"CO: 25 %", spmet:"SpMet: < 2.0 %", gcsDetail: gcsStr, news: "NEWS2-Score: 14 Punkte (Extremer Risikobereich)", qsofa: "qSOFA-Score: 3 Punkte (Maximaler Score)", x:"Keine", befast, nexus, wells, spesi, apgar };
     }
   }
 
@@ -719,24 +733,24 @@
         ],
         vitals: [
           { key: "Puls", val: injData.p },
-          { key: "Blutdruck (RR)", val: injData.rr },
-          { key: "Rekapillarisierungszeit (ReKap)", val: injData.rekap },
-          { key: "Atemfrequenz (AF)", val: injData.af },
-          { key: "Soll-SpO2", val: injData.spo2 },
-          { key: "Blutzucker (BZ)", val: injData.bz },
-          { key: "Körpertemperatur (Temp)", val: injData.temp },
-          { key: "Kapnometrie (etCO2)", val: injData.etco2 },
-          { key: "Kohlenmonoxid (CO)", val: injData.co },
-          { key: "Methämoglobin (SpMet)", val: injData.spmet }
+          { key: "RR (Blutdruck)", val: injData.rr },
+          { key: "ReKap (Rekapillarisierungszeit)", val: injData.rekap },
+          { key: "AF (Atemfrequenz)", val: injData.af },
+          { key: "SpO2 (Saugenstoffpartialsättigung)", val: injData.spo2 },
+          { key: "BZ (Blutzucker)", val: injData.bz },
+          { key: "Temp (Körpertemperatur)", val: injData.temp },
+          { key: "etCO2 (Kapnometrie)", val: injData.etco2 },
+          { key: "CO (Kohlenmonoxid)", val: injData.co },
+          { key: "SpMet (Methämoglobin)", val: injData.spmet }
         ],
         scores: [
           { key: "GCS (Glasgow Coma Scale)", val: injData.gcsDetail },
           { key: "BE-FAST Schema", val: injData.befast },
-          { key: "NEWS2-Score", val: isChild ? "N/A (Nur für Erwachsene)" : `Gesamt: ${injData.news} Punkte` },
+          { key: "NEWS2-Score", val: injData.news },
           { key: "NEXUS-Kriterien", val: injData.nexus },
-          { key: "qSOFA-Score", val: isChild ? "N/A (Nur für Erwachsene)" : injData.qsofa },
-          { key: "sPESI-Score", val: isChild ? "N/A" : injData.spesi },
-          { key: "Wells-Score", val: isChild ? "N/A" : injData.wells },
+          { key: "qSOFA-Score", val: injData.qsofa },
+          { key: "sPESI-Score", val: injData.spesi },
+          { key: "Wells-Score", val: injData.wells },
           { key: "APGAR-Schema", val: injData.apgar }
         ]
       });
